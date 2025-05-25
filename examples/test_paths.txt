@@ -1,0 +1,45 @@
+# Test script for path handling and directory navigation
+# This script will test various directory operations
+
+# First, let's see where we are
+list current directory
+
+# Create a test directory structure
+make directory test_paths
+make directory test_paths/subfolder1
+make directory test_paths/subfolder2
+
+# Navigate into the test directory
+navigate to test_paths
+
+# List contents to verify creation
+list current directory
+
+# Create some test files
+copy file ../examples/cleanup_script.txt to ./test_copy.txt
+
+# Navigate to subfolder
+navigate to subfolder1
+list current directory
+
+# Go back up
+navigate to ..
+list current directory
+
+# Try parent navigation
+navigate to ..
+list current directory
+
+# Test disk space analysis at different levels
+analyze disk space in .
+analyze disk space in test_paths
+analyze disk space in test_paths/subfolder1
+
+# Clean up test directories
+remove file test_paths/test_copy.txt
+remove file test_paths/subfolder1
+remove file test_paths/subfolder2
+remove file test_paths
+
+# Final verification
+list current directory

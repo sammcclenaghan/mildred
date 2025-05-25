@@ -12,10 +12,11 @@ require_relative "loggable"
 class Agent
   include Loggable
 
-  def initialize(dry_run: false, root_path: ENV['HOME'])
+  def initialize(dry_run: false, root_path: Dir.pwd)
     @chat = RubyLLM.chat
     @root_path = File.expand_path(root_path)
-    @current_path = File.expand_path(Dir.pwd)
+    @current_path = @root_path
+    @start_path = @root_path
     info "Initializing agent with root_path: #{@root_path}"
     info "Current working directory: #{@current_path}"
 
@@ -48,6 +49,13 @@ class Agent
     info "Agent initialized in #{dry_run ? 'dry-run' : 'normal'} mode at #{@root_path}"
   end
 
+  def ask(input)
+    info "Processing input: #{input}"
+    response = @chat.ask(input)
+    debug "Got response: #{response.content} (current_path: #{@current_path})"
+    response
+  end
+
   def run
     puts "Chat with the agent. Type 'exit' to ... well, exit"
     loop do
@@ -55,9 +63,7 @@ class Agent
       user_input = STDIN.gets.chomp
       break if user_input == "exit"
 
-      info "Processing user input: #{user_input}"
-      response = @chat.ask user_input
-      debug "Got response: #{response.content} (current_path: #{@current_path})"
+      response = ask(user_input)
       puts response.content
     end
   end
@@ -83,10 +89,10 @@ class Agent
   def validate_path(path)
     expanded_path = File.expand_path(path, @current_path)
     debug "Validating path: #{path} -> #{expanded_path} (root: #{@root_path})"
-    if expanded_path.start_with?(@root_path)
+    if expanded_path.start_with?(@root_path) || expanded_path.start_with?(@start_path)
       expanded_path
     else
-      raise "Access denied: Cannot access paths outside of #{@root_path}"
+      raise "Access denied: Cannot access paths outside of #{@root_path} or #{@start_path}"
     end
   end
 

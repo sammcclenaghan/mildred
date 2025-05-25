@@ -1,0 +1,56 @@
+# Project Organization Script
+# This script sets up and organizes a development project structure
+
+# Create main project directories
+make directory project
+make directory project/src
+make directory project/tests
+make directory project/docs
+make directory project/config
+make directory project/assets
+make directory project/build
+make directory project/scripts
+
+# Navigate to project
+navigate to project
+
+# Create standard config files
+copy file config/default.yml to config/development.yml
+copy file config/default.yml to config/production.yml
+
+# Set up source code structure
+make directory src/models
+make directory src/controllers
+make directory src/views
+make directory src/utils
+make directory src/services
+
+# Set up test structure
+make directory tests/unit
+make directory tests/integration
+make directory tests/fixtures
+
+# Create asset directories
+make directory assets/images
+make directory assets/styles
+make directory assets/scripts
+make directory assets/fonts
+
+# Create documentation structure
+make directory docs/api
+make directory docs/guides
+make directory docs/examples
+
+# Analyze the project structure
+analyze disk space in .
+
+# List the final structure
+list current directory
+
+# Navigate into source and list structure
+navigate to src
+list current directory
+
+# Navigate back and check total space
+navigate to ..
+analyze disk space in . --depth=2

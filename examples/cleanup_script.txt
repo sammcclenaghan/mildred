@@ -1,0 +1,34 @@
+# Example cleanup script for Downloads folder
+# Each line is a command that will be executed in order
+
+# First, analyze the current disk space
+analyze disk space in Downloads
+
+# Create organized directories
+make directory Downloads/images
+make directory Downloads/documents
+make directory Downloads/archives
+make directory Downloads/other
+
+# Navigate to Downloads
+navigate to Downloads
+
+# Move files to appropriate directories
+move file *.jpg to images
+move file *.png to images
+move file *.gif to images
+
+move file *.pdf to documents
+move file *.doc to documents
+move file *.docx to documents
+move file *.txt to documents
+
+move file *.zip to archives
+move file *.rar to archives
+move file *.tar.gz to archives
+
+# Check the final organization
+analyze disk space in .
+
+# List the organized directories
+list current directory
