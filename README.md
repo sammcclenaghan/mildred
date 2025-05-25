@@ -20,7 +20,7 @@ Mildred is a Ruby-based AI file management assistant that helps you organize, ma
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/mildred.git
+git clone https://github.com/sammcclenaghan/mildred.git
 cd mildred
 ```
 
