@@ -1,4 +1,4 @@
-![ChatGPT Image May 25, 2025, 12_21_58 AM](https://github.com/user-attachments/assets/7ce8d403-cfc7-4cbf-8346-04b2adaa8bb9)
+![ai_maid_icon_512](https://github.com/user-attachments/assets/093e5cc3-4805-4d2f-8f2b-14f9208497f6)
 
 # Mildred - AI-Powered File Management Assistant
 
@@ -32,7 +32,6 @@ cp .env.example .env
 ```
 
 ## Usage
-![ChatGPT Image May 25, 2025, 12_21_58 AM](https://github.com/user-attachments/assets/3830ee57-2e9c-43e6-9dec-951171bb74a9)
 
 ### Interactive Mode
 
