@@ -3,6 +3,10 @@ require_relative "tools/read_file"
 require_relative "tools/list_files"
 require_relative "tools/remove_file"
 require_relative "tools/navigate_directory"
+require_relative "tools/copy_file"
+require_relative "tools/move_file"
+require_relative "tools/make_directory"
+require_relative "tools/disk_space"
 require_relative "loggable"
 
 class Agent
@@ -19,7 +23,11 @@ class Agent
       Tools::ReadFile,
       Tools::ListFiles,
       Tools::RemoveFile,
-      Tools::NavigateDirectory
+      Tools::NavigateDirectory,
+      Tools::CopyFile,
+      Tools::MoveFile,
+      Tools::MakeDirectory,
+      Tools::DiskSpace
     )
 
     # Set dry run mode for all tools
@@ -27,7 +35,11 @@ class Agent
       Tools::ReadFile,
       Tools::ListFiles,
       Tools::RemoveFile,
-      Tools::NavigateDirectory
+      Tools::NavigateDirectory,
+      Tools::CopyFile,
+      Tools::MoveFile,
+      Tools::MakeDirectory,
+      Tools::DiskSpace
     ].each do |tool|
       tool.dry_run_mode = dry_run
     end
