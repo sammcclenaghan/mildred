@@ -1,3 +1,5 @@
+![ChatGPT Image May 25, 2025, 12_21_58 AM](https://github.com/user-attachments/assets/7ce8d403-cfc7-4cbf-8346-04b2adaa8bb9)
+
 # Mildred - AI-Powered File Management Assistant
 
 Mildred is a Ruby-based AI file management assistant that helps you organize, maintain, and clean up your filesystem. Think of it as an AI-powered version of the classic Ruby Maid gem, with interactive and scripting capabilities.
@@ -30,6 +32,7 @@ cp .env.example .env
 ```
 
 ## Usage
+![ChatGPT Image May 25, 2025, 12_21_58 AM](https://github.com/user-attachments/assets/3830ee57-2e9c-43e6-9dec-951171bb74a9)
 
 ### Interactive Mode
 
