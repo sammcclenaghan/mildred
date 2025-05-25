@@ -1,10 +1,14 @@
-![ai_maid_icon_512](https://github.com/user-attachments/assets/093e5cc3-4805-4d2f-8f2b-14f9208497f6)
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/c0196b3a-3091-4c7c-85bd-548f28d24ecb" />
+</p>
 
 # Mildred - AI-Powered File Management Assistant
 
 Mildred is a Ruby-based AI file management assistant that helps you organize, maintain, and clean up your filesystem. Think of it as an AI-powered version of the classic Ruby Maid gem, with interactive and scripting capabilities.
 
 ## Features
+
 
 - 🤖 AI-powered file organization
 - 📂 Interactive file management
