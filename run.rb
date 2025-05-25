@@ -5,8 +5,10 @@ require_relative 'src/agent'
 RubyLLM.configure do |config|
   config.deepseek_api_key = ENV.fetch('DEEPSEEK_API_KEY', nil)
   config.default_model = 'deepseek-chat'
+end
 
+Dir.chdir(ENV['HOME']) do
   dry_run = ARGV.include?("--dry-run")
-  agent = Agent.new(dry_run: dry_run)
+  agent = Agent.new(dry_run: dry_run, root_path: ENV['HOME'])
   agent.run
 end
