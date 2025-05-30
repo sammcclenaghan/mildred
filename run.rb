@@ -14,7 +14,11 @@ script_path = ARGV.find { |arg| !arg.start_with?('--') }
 
 if script_path
   absolute_script_path = File.expand_path(script_path, current_dir)
-  ScriptRunner.run(absolute_script_path, dry_run: dry_run)
+  Dir.chdir(ENV['HOME']) do
+    Dir.chdir(ENV['HOME']) do
+      ScriptRunner.run(absolute_script_path, dry_run: dry_run)
+    end
+  end
 else
   Dir.chdir(ENV['HOME']) do
     agent = Agent.new(dry_run: dry_run, root_path: ENV['HOME'])

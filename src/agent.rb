@@ -20,11 +20,14 @@ class Agent
     info "Initializing agent with root_path: #{@root_path}"
     info "Current working directory: #{@current_path}"
 
+    nav_tool = Tools::NavigateDirectory.new(initial_path: @current_path)
+    list_tool = Tools::ListFiles.new
+
     @chat.with_tools(
       Tools::ReadFile,
-      Tools::ListFiles,
       Tools::RemoveFile,
-      Tools::NavigateDirectory,
+      nav_tool,
+      list_tool,
       Tools::CopyFile,
       Tools::MoveFile,
       Tools::MakeDirectory,
@@ -34,9 +37,9 @@ class Agent
     # Set dry run mode for all tools
     [
       Tools::ReadFile,
-      Tools::ListFiles,
+      list_tool.class,
       Tools::RemoveFile,
-      Tools::NavigateDirectory,
+      nav_tool.class,
       Tools::CopyFile,
       Tools::MoveFile,
       Tools::MakeDirectory,
@@ -77,7 +80,7 @@ class Agent
       1. Never navigate above the root directory: #{@root_path}
       2. Always verify paths before operations
       3. Never modify system or hidden files
-      4. Always confirm before destructive operations
+      4. Always confirm before destructive operations when in dry run mode
       5. Keep track of your current location
 
       Current location: #{@current_path}

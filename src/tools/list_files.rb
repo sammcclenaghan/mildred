@@ -11,13 +11,15 @@ module Tools
     param :recursive, desc: "Whether to list files recursively", required: false
     param :pattern, desc: "Optional glob pattern to filter files (e.g., '**/*.rb')", required: false
 
-    def execute(path: "", recursive: false, pattern: "*")
-      info "Listing files at path: #{path} (recursive: #{recursive})"
+    def execute(path: ".", recursive: false, pattern: "*")
+      # Resolve the path relative to current directory
+      full_path = File.expand_path(path)
+      info "Listing files at path: #{full_path} (recursive: #{recursive})"
 
       search_pattern = if recursive
-        File.join(path, "**", pattern)
+        File.join(full_path, "**", pattern)
       else
-        File.join(path, pattern)
+        File.join(full_path, pattern)
       end
 
       files = Dir.glob(search_pattern).map do |filename|
@@ -31,7 +33,7 @@ module Tools
       end
 
       {
-        current_directory: Dir.pwd,
+        current_directory: full_path,
         files: files,
         total_count: files.length
       }

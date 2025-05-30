@@ -13,6 +13,7 @@ module Tools
     param :force, desc: "Whether to force removal and ignore errors", required: false
 
     def execute(path:, force: false)
+      full_path = File.expand_path(path)
       unless File.exist?(full_path)
         return { error: "Path not found: #{path}" }
       end
