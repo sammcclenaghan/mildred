@@ -5,9 +5,9 @@
 
 # Mildred - AI-Powered File Management Assistant
 
-Remember the scandalous affair between Arnold Schwarzenegger and his housekeeper Mildred? Well, meet Mildred, your own personal AI file system maid - but this one's all about keeping your directories clean and organized, not causing tabloid headlines!
+Mildred is a Ruby-based AI file management assistant that helps you organize, maintain, and clean up your filesystem. Think of it as an AI-powered version of the classic Ruby Maid gem, with interactive and scripting capabilities.
 
-## What Makes Mildred Special?
+## Features
 
 
 - 🤖 AI-powered file organization
@@ -16,11 +16,6 @@ Remember the scandalous affair between Arnold Schwarzenegger and his housekeeper
 - 🔍 Disk space analysis
 - 🔒 Safe operation with dry-run mode
 
-- 🧹 Clean up your messy directories
-- 📂 Organize your digital life
-- 💅 Add some sass to your file management
-- 🔍 Find those files you "lost"
-- 🗑️ Take out the digital trash
 
 ## Getting Started with Your New Maid
 
@@ -32,57 +27,66 @@ cd mildred
 bundle install
 ```
 
-### Setting Up Your Relationship
+### Setting Up Your Environment
 
 ```bash
 cp .env.example .env
 # Add your AI API key - Mildred needs to know who to talk to!
 ```
 
-## How to Interact with Mildred
+## Usage
 
-### Interactive Mode (For Those Personal Moments)
+### Run mildred in interactive mode
 
 ```bash
 ruby run.rb
 ```
 
-Want to test the waters first? Use dry-run mode:
+Or with dry-run mode to safely test operations:
 ```bash
 ruby run.rb --dry-run
 ```
 
-### Script Mode (When You Need Discretion)
+### Script Mode
 
 ```bash
 ruby run.rb path/to/script.txt
 ```
 
-## Mildred's Special Skills
+Example script (`examples/cleanup_script.txt`):Add commentMore actions
+```
+# Create organized directories
+make directory Downloads/images
+make directory Downloads/documents
 
-### File Operations
-- `navigate` - Let Mildred guide you through your directories
-- `list` - Have her show you what's where
-- `move` - She'll relocate your files with care
-- `copy` - Perfect duplicates, every time
-- `remove` - When it's time to let go
-- `make directory` - Creating new spaces for your digital life
+# Move files to appropriate directories
+move file *.jpg to images
+move file *.pdf to documents
 
-### Analysis & Organization
-- `analyze disk space` - She'll tell you who's taking up too much space
-- `search` - Finding what you need, when you need it
-- `sort` - Because chaos is so last season
+# Verify organization
+list current directory
+```
 
-## Safety First
+## Available Tools
+ `navigate` - Change current directoryAdd commentMore actions
+- `list` - List directory contents
+- `move` - Move files or directories
+- `copy` - Copy files or directories
+- `remove` - Delete files or directories
+- `make directory` - Create new directories
 
-Mildred is discreet and careful:
-- Dry run mode to preview changes
-- Path validation to prevent accidents
-- Detailed logging of all activities
-- Careful error handling
+### Analysis Tools
+- `analyze disk space` - Get storage usage statistics
+- Search for files by pattern
+- List directory contents with details
 
-## Example Tasks
+## Safety Features
+- Dry run mode for testing operations
+- Path validation to prevent accidental modifications
+- Clear logging of all operations
+- Error handling and reporting
 
+## Writing Scripts
 Here's how Mildred can help:
 
 ```bash
@@ -100,27 +104,23 @@ analyze disk space in Documents
 remove file Documents/old_drafts/*
 ```
 
+## Example Scripts
+
+Check the `examples/` directory for sample scripts:
+- `cleanup_script.txt` - Organize downloads folder
+- `organize_project.txt` - Set up project structure
+- `test_paths.txt` - Test directory operations
+
 ## Requirements
 
 - Ruby 3.0 or higher
 - Bundler
-- AI API key (Mildred needs her communication device!)
+- AI API key (supported providers: OpenAI, DeepSeek, Anthropic)
 
-## License
+## Acknowledgments
 
-MIT License - Feel free to have your own affair with Mildred!
-
-## Special Thanks
-
-Inspired by:
-- The original Mildred (sorry, Arnold!)
-- Ruby Maid gem (but with more personality)
-- Every messy directory that needed a caring touch
+- Inspired by the Ruby Maid gem
+- Built with RubyLLM for AI capabilities
 
 ## Author
-
-Your Name (@yourusername) - Bringing personal assistance back to file management!
-
----
-
-Remember: What happens in your file system, stays in your file system! 😉
+Sam McClenaghan (@sammcclenaghan)
