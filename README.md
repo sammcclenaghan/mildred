@@ -1,10 +1,20 @@
-# Mildred - Your Personal AI File System Maid
 
-Remember the scandalous affair between Arnold Schwarzenegger and his housekeeper Mildred? Well, meet Mildred, your own personal AI file system maid - but this one's all about keeping your directories clean and organized, not causing tabloid headlines! 
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/c0196b3a-3091-4c7c-85bd-548f28d24ecb" />
+</p>
+
+# Mildred - AI-Powered File Management Assistant
+
+Remember the scandalous affair between Arnold Schwarzenegger and his housekeeper Mildred? Well, meet Mildred, your own personal AI file system maid - but this one's all about keeping your directories clean and organized, not causing tabloid headlines!
 
 ## What Makes Mildred Special?
 
-Unlike other file management tools, Mildred is designed to be personal, interactive, and dare we say... a bit flirty with your file system. She's here to:
+
+- 🤖 AI-powered file organization
+- 📂 Interactive file management
+- 📜 Scriptable operations
+- 🔍 Disk space analysis
+- 🔒 Safe operation with dry-run mode
 
 - 🧹 Clean up your messy directories
 - 📂 Organize your digital life
@@ -17,7 +27,7 @@ Unlike other file management tools, Mildred is designed to be personal, interact
 ### Installation
 
 ```bash
-git clone https://github.com/yourusername/mildred.git
+git clone https://github.com/sammcclenaghan/mildred.git
 cd mildred
 bundle install
 ```
