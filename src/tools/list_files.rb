@@ -28,6 +28,7 @@ module Tools
           type: File.directory?(filename) ? "directory" : "file",
           size: File.size(filename),
           modified: File.mtime(filename).iso8601,
+          created: File.ctime(filename).iso8601,
           permissions: File.stat(filename).mode.to_s(8)
         }
       end
