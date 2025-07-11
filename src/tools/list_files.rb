@@ -11,9 +11,15 @@ module Tools
     param :recursive, desc: "Whether to list files recursively", required: false
     param :pattern, desc: "Optional glob pattern to filter files (e.g., '**/*.rb')", required: false
 
+    def initialize(navigation_tool: nil)
+      super()
+      @navigation_tool = navigation_tool
+    end
+
     def execute(path: ".", recursive: false, pattern: "*")
-      # Resolve the path relative to current directory
-      full_path = File.expand_path(path)
+      # Use navigation tool's current path if available, otherwise use process working directory
+      base_path = @navigation_tool&.current_path || Dir.pwd
+      full_path = File.expand_path(path, base_path)
       info "Listing files at path: #{full_path} (recursive: #{recursive})"
 
       search_pattern = if recursive

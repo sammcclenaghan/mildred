@@ -12,8 +12,15 @@ module Tools
     param :path, desc: "The path of the directory to create"
     param :parents, desc: "Whether to create parent directories as needed", required: false
 
+    def initialize(navigation_tool: nil)
+      super()
+      @navigation_tool = navigation_tool
+    end
+
     def execute(path:, parents: true)
-      target_path = File.expand_path(path)
+      # Use navigation tool's current path if available, otherwise use process working directory
+      base_path = @navigation_tool&.current_path || Dir.pwd
+      target_path = File.expand_path(path, base_path)
 
       if File.exist?(target_path)
         if File.directory?(target_path)
@@ -50,7 +57,7 @@ module Tools
         }
       rescue => e
         error "Failed to create directory: #{e.message}"
-        { 
+        {
           error: e.message,
           path: target_path
         }

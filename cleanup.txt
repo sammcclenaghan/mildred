@@ -1,5 +1,3 @@
 Go to the Downloads folder, and delete everything in the folder
 
 All screenshots are in my Desktop folder, move all screenshots to a folder in the Documents folder
-
-Move all files in the Downloads folder referencing a class to their respective class folders in the Documents folder

@@ -21,28 +21,33 @@ class Agent
     info "Current working directory: #{@current_path}"
 
     nav_tool = Tools::NavigateDirectory.new(initial_path: @current_path)
-    list_tool = Tools::ListFiles.new
+    list_tool = Tools::ListFiles.new(navigation_tool: nav_tool)
+    remove_tool = Tools::RemoveFile.new(navigation_tool: nav_tool)
+    read_tool = Tools::ReadFile.new(navigation_tool: nav_tool)
+    copy_tool = Tools::CopyFile.new(navigation_tool: nav_tool)
+    move_tool = Tools::MoveFile.new(navigation_tool: nav_tool)
+    make_dir_tool = Tools::MakeDirectory.new(navigation_tool: nav_tool)
 
     @chat.with_tools(
-      Tools::ReadFile,
-      Tools::RemoveFile,
+      read_tool,
+      remove_tool,
       nav_tool,
       list_tool,
-      Tools::CopyFile,
-      Tools::MoveFile,
-      Tools::MakeDirectory,
+      copy_tool,
+      move_tool,
+      make_dir_tool,
       Tools::DiskSpace
     )
 
     # Set dry run mode for all tools
     [
-      Tools::ReadFile,
+      read_tool.class,
       list_tool.class,
-      Tools::RemoveFile,
+      remove_tool.class,
       nav_tool.class,
-      Tools::CopyFile,
-      Tools::MoveFile,
-      Tools::MakeDirectory,
+      copy_tool.class,
+      move_tool.class,
+      make_dir_tool.class,
       Tools::DiskSpace
     ].each do |tool|
       tool.dry_run_mode = dry_run
