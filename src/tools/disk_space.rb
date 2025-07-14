@@ -127,8 +127,8 @@ module Tools
     def categorize_size(size)
       case size
       when 0...1024 then "< 1KB"
-      when 1024...1024**2 then "1KB-1MB"
-      when 1024**2...1024**3 then "1MB-1GB"
+      when 1024...(1024**2) then "1KB-1MB"
+      when (1024**2)...(1024**3) then "1MB-1GB"
       else "> 1GB"
       end
     end
