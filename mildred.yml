@@ -1,0 +1,6 @@
+jobs:
+  - name: Desktop Cleanup
+    directory: ~/Desktop
+    tasks:
+      - Delete screenshots older than 30 days
+      - Organize files into folders by type (Documents, Images, Archives)
