@@ -1,6 +1,5 @@
 jobs:
-  - name: Desktop Cleanup
-    directory: ~/Desktop
+  - name: Download Cleanup
+    directory: ~/Downloads
     tasks:
-      - Delete screenshots older than 30 days
-      - Organize files into folders by type (Documents, Images, Archives)
+      - Name one file in my downloads

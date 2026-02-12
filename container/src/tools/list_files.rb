@@ -6,10 +6,15 @@ module Tools
     param :path, desc: "Optional relative path to list files from. Defaults to current directory if not provided"
 
     def execute(path: "")
-      Dir.glob(File.join(path, "*"))
-         .map { |filename| File.directory?(filename) ? "#{filename}/" : filename}
+      entries = Dir.glob(File.join(path, "*"))
+        .map { |f| File.directory?(f) ? "#{f}/" : f }
+        .sort
+
+      return "Directory is empty." if entries.empty?
+
+      entries.join("\n")
     rescue => e
-      { error: e.message}
+      "Error: #{e.message}"
     end
   end
 end
