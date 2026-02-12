@@ -1,4 +1,4 @@
 #!/usr/bin/env ruby
-require_relative "../lib/mildred/cli"
+require_relative "../lib/mildred"
 
-Mildred::CLI.run(ARGV)
+Mildred::CLI.start(ARGV)

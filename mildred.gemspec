@@ -11,4 +11,6 @@ Gem::Specification.new do |s|
   s.executables = ["mildred"]
 
   s.required_ruby_version = ">= 3.0"
+
+  s.add_dependency "gum", "~> 0.3"
 end

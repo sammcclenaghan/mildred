@@ -2,10 +2,13 @@ PATH
   remote: .
   specs:
     mildred (0.1.0)
+      gum (~> 0.3)
 
 GEM
   remote: https://rubygems.org/
   specs:
+    gum (0.3.2)
+    gum (0.3.2-arm64-darwin)
 
 PLATFORMS
   arm64-darwin-25

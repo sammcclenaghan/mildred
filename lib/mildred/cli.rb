@@ -1,93 +1,59 @@
-require "yaml"
-require "open3"
+require "gum"
 
 module Mildred
   class CLI
-    IMAGE = "mildred"
+    def self.start(args)
+      command_name = args[0]
+      command_args = args[1..]
 
-    def self.run(args)
-      command = args[0]
-      config_path = args[1] || "mildred.yml"
+      if command_name.nil? || command_name == "help"
+        print_help
+        return
+      end
 
-      case command
-      when "clean"
-        new(config_path).clean
-      when "build"
-        new(config_path).build
-      else
-        $stderr.puts "Usage: mildred <clean|build> [config.yml]"
+      klass = commands[command_name]
+      unless klass
+        display_error("Unknown command: #{command_name}")
+        print_help
         exit 1
       end
+
+      klass.new(command_args).call
+    rescue Mildred::Error => e
+      display_error(e.message)
+      exit 1
     end
 
-    def initialize(config_path)
-      @config = YAML.load_file(config_path)
-      @settings = @config.fetch("settings", {})
+    def self.commands
+      @commands ||= {}
     end
 
-    def build
-      container_dir = File.expand_path("../../container", __dir__)
-      system("container", "build", "-t", IMAGE, container_dir) || abort("Build failed")
+    def self.register(name, klass)
+      commands[name.to_s] = klass
     end
 
-    def clean
-      jobs = @config.fetch("jobs", [])
-      jobs.each { |job| run_job(job) }
-    end
-
-    private
-
-    def ollama_api_base
-      ollama = @settings.dig("ollama") || {}
-      host = ollama.fetch("host", "192.168.64.1")
-      port = ollama.fetch("port", 11434)
-      "http://#{host}:#{port}/v1"
-    end
-
-    def model
-      @settings.fetch("model", "granite4:latest")
-    end
-
-    def run_job(job)
-      name = job.fetch("name")
-      directory = File.expand_path(job.fetch("directory"))
-      tasks = job.fetch("tasks", [])
-
-      puts "Spinning up container..."
+    def self.print_help
+      puts Gum.style("mildred", foreground: "212", bold: true, border: :rounded, padding: "0 2")
       puts
-
-      cmd = [
-        "container", "run", "-i", "--rm",
-        "--volume", "#{directory}:/workspace",
-        "-e", "OLLAMA_API_BASE=#{ollama_api_base}",
-        "-e", "MILDRED_MODEL=#{model}",
-        IMAGE
-      ]
-
-      Open3.popen3(*cmd) do |stdin, stdout, stderr, wait_thread|
-        stderr_reader = Thread.new do
-          stderr.each_line do |line|
-            if line.include?("Calling tool:")
-              puts "  #{line.strip}"
-            elsif line.include?("Arguments:")
-              puts "    #{line.strip}"
-            end
-          end
-        end
-
-        tasks.each do |task|
-          stdin.puts task
-          stdin.flush
-        end
-        stdin.close
-
-        stdout.each_line { |line| puts "  #{line}" }
-        stderr_reader.join
-        wait_thread.value
+      commands.each do |name, klass|
+        label = Gum.style("  #{name}", foreground: "39", bold: true)
+        desc = Gum.style(" #{klass.description}", foreground: "252")
+        puts "#{label}#{desc}"
       end
-
       puts
-      puts "Finished!"
+    end
+
+    def self.display_error(msg)
+      puts Gum.style(
+        "  ✗ #{msg}",
+        foreground: "203",
+        bold: true,
+        border: :rounded,
+        border_foreground: "203",
+        padding: "0 1"
+      )
     end
   end
+
+  class Error < StandardError; end
 end
