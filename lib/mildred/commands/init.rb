@@ -9,7 +9,7 @@ module Mildred
 
         settings:
           provider: ollama
-          model: granite4:latest
+          model: qwen3:8b
 
           ollama:
             port: 11434

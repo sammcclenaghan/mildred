@@ -3,7 +3,11 @@ require "ruby_llm/tool"
 module Tools
   class ListFiles < RubyLLM::Tool
     description "List files and directories at a given path. If no path is provided, lists files in the current directory."
-    param :path, desc: "Optional relative path to list files from. Defaults to current directory if not provided"
+
+    def name
+      "list_files"
+    end
+    param :path, desc: "Relative path to list files from. Defaults to current directory if not provided.", required: false
 
     def execute(path: "")
       entries = Dir.glob(File.join(path, "*"))

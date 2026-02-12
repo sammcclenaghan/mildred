@@ -4,6 +4,10 @@ require "fileutils"
 module Tools
   class MoveFile < RubyLLM::Tool
     description "Move or rename a file or directory from one path to another."
+
+    def name
+      "move_file"
+    end
     param :source, desc: "The relative path of the file or directory to move."
     param :destination, desc: "The relative path to move the file or directory to."
 

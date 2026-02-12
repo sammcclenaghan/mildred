@@ -6,7 +6,7 @@ AI file organizer that runs in a sandboxed [Apple Container](https://github.com/
 
 - macOS 26+ (Apple Silicon)
 - [Apple Container CLI](https://github.com/apple/container)
-- [Ollama](https://ollama.com) with a model pulled (default: `granite4:latest`)
+- [Ollama](https://ollama.com) with a model pulled (default: `qwen3:latest`)
 - Ruby 3.0+
 
 ## Install
@@ -64,10 +64,10 @@ Mildred uses Ollama as its LLM backend. The container connects to Ollama on your
 
 1. **Install Ollama** from [ollama.com](https://ollama.com)
 
-2. **Pull a model** (Mildred defaults to `granite4`):
+2. **Pull a model** (Mildred defaults to `qwen3` -- it needs good tool-calling support):
 
    ```bash
-   ollama pull granite4
+   ollama pull qwen3
    ```
 
 3. **Start Ollama** — if Ollama is already running as a macOS app, it should work out of the box. If you're running it manually via the CLI, make sure it binds to all interfaces so the container can reach it:

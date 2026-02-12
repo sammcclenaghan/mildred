@@ -126,7 +126,7 @@ module Mildred
       end
 
       def model(settings)
-        settings.fetch("model", "granite4:latest")
+        settings.fetch("model", "qwen2.5:7b")
       end
 
       def run_job(job, settings)
