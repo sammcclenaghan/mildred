@@ -12,7 +12,6 @@ module Mildred
           model: granite4:latest
 
           ollama:
-            host: 192.168.64.1
             port: 11434
 
         jobs:

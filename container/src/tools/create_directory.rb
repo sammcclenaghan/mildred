@@ -7,6 +7,10 @@ module Tools
     param :path, desc: "The relative path of the directory to create."
 
     def execute(path:)
+      if ENV["MILDRED_DRY_RUN"] == "1"
+        return "[DRY RUN] Would create directory: #{path}"
+      end
+
       FileUtils.mkdir_p(path)
       "Created directory: #{path}"
     rescue => e

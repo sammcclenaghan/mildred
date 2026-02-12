@@ -10,9 +10,11 @@ module Mildred
         container_dir = File.expand_path("../../../container", __dir__)
 
         display_header("Build")
+        output, status = nil
         Gum.spin("Building mildred image...", spinner: :dot) do
-          system("container", "build", "-t", "mildred", "-q", container_dir, out: File::NULL, err: File::NULL)
+          output, status = Open3.capture2e("container", "build", "-t", "mildred", container_dir)
         end
+        raise Error, "Build failed:\n#{output.lines.last(5).join}" unless status&.success?
         display_success("Image built")
         puts
       end
