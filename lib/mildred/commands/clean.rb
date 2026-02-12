@@ -1,5 +1,8 @@
 require "yaml"
 require "open3"
+require "digest"
+require "net/http"
+require "uri"
 
 module Mildred
   module Commands
@@ -9,8 +12,7 @@ module Mildred
       option :config, alias: "-c", desc: "Config file path", default: "mildred.yml", type: :string
 
       IMAGE = "mildred"
-      DNS_DOMAIN = "host.container.internal"
-      DNS_IP = "203.0.113.113"
+      DEFAULT_HOST_GATEWAY = "192.168.64.1"
 
       def call
         config_path = @options[:config] || @args[0] || "mildred.yml"
@@ -22,8 +24,8 @@ module Mildred
         raise Error, "No jobs defined in config" if jobs.empty?
 
         check_container_cli!
-        check_host_dns!
         ensure_image!
+        check_ollama!(settings)
 
         jobs.each { |job| run_job(job, settings) }
       end
@@ -37,18 +39,33 @@ module Mildred
         raise Error, "Apple Container CLI not found. Install from https://github.com/apple/container"
       end
 
-      def host_dns_exists?
-        output, status = Open3.capture2("container", "system", "dns", "list")
-        status.success? && output.include?(DNS_DOMAIN)
-      end
+      def check_ollama!(settings)
+        port = ollama_port(settings)
 
-      def check_host_dns!
-        return if host_dns_exists?
+        # Check localhost first — that's where Ollama is running on the host
+        Net::HTTP.start("127.0.0.1", port, open_timeout: 3, read_timeout: 3) do |http|
+          http.get("/")
+        end
 
+        # Ollama is running, now check it's reachable on the gateway interface
+        # (containers connect via the host gateway, not localhost)
+        begin
+          Net::HTTP.start(DEFAULT_HOST_GATEWAY, port, open_timeout: 3, read_timeout: 3) do |http|
+            http.get("/")
+          end
+        rescue Errno::ECONNREFUSED, Errno::EHOSTUNREACH, Net::OpenTimeout
+          raise Error, <<~MSG.strip
+            Ollama is running but only listening on localhost.
+            Containers connect via the host gateway (#{DEFAULT_HOST_GATEWAY}), so Ollama must bind to all interfaces.
+
+            Restart Ollama with:
+              OLLAMA_HOST=0.0.0.0 ollama serve
+          MSG
+        end
+      rescue Errno::ECONNREFUSED, Errno::EHOSTUNREACH, Net::OpenTimeout, SocketError
         raise Error, <<~MSG.strip
-          Container DNS not configured. Run this once to allow containers to reach host services:
-
-            sudo container system dns create #{DNS_DOMAIN} --localhost #{DNS_IP}
+          Cannot reach Ollama on port #{ollama_port(settings)}.
+          Make sure Ollama is running: ollama serve
         MSG
       end
 
@@ -57,23 +74,55 @@ module Mildred
         status.success? && output.lines.any? { |line| line.strip.start_with?(IMAGE) }
       end
 
-      def ensure_image!
-        return if image_exists?
+      def container_dir
+        @container_dir ||= File.expand_path("../../../container", __dir__)
+      end
 
-        display_info("Image not found. Building (first run only)...")
-        container_dir = File.expand_path("../../../container", __dir__)
+      def container_source_digest
+        files = Dir.glob(File.join(container_dir, "**/*"))
+          .select { |f| File.file?(f) && !f.end_with?(".build-digest") }
+          .sort
+        content = files.map { |f| "#{f}:#{File.read(f)}" }.join
+        Digest::SHA256.hexdigest(content)[0, 12]
+      end
+
+      def digest_file
+        File.join(container_dir, ".build-digest")
+      end
+
+      def image_up_to_date?
+        return false unless image_exists?
+        return false unless File.exist?(digest_file)
+
+        File.read(digest_file).strip == container_source_digest
+      end
+
+      def ensure_image!
+        return if image_up_to_date?
+
+        reason = image_exists? ? "Source changed. Rebuilding" : "Image not found. Building (first run only)"
+        display_info("#{reason}...")
         output, status = nil
         Gum.spin("Building mildred image...", spinner: :dot) do
           output, status = Open3.capture2e("container", "build", "-t", IMAGE, container_dir)
         end
         raise Error, "Build failed:\n#{output.lines.last(5).join}" unless status&.success?
+
+        File.write(digest_file, container_source_digest)
+      end
+
+      def ollama_host(settings)
+        ollama = settings.dig("ollama") || {}
+        ollama.fetch("host", DEFAULT_HOST_GATEWAY)
+      end
+
+      def ollama_port(settings)
+        ollama = settings.dig("ollama") || {}
+        ollama.fetch("port", 11434)
       end
 
       def ollama_api_base(settings)
-        ollama = settings.dig("ollama") || {}
-        host = ollama.fetch("host", DNS_DOMAIN)
-        port = ollama.fetch("port", 11434)
-        "http://#{host}:#{port}/v1"
+        "http://#{ollama_host(settings)}:#{ollama_port(settings)}/v1"
       end
 
       def model(settings)
@@ -123,7 +172,12 @@ module Mildred
           stderr_reader.join
 
           status = wait_thread.value
-          raise Error, "Container exited with status #{status.exitstatus}" unless status.success?
+          unless status.success?
+            unless container_errors.empty?
+              $stderr.puts container_errors.last(10).join("\n")
+            end
+            raise Error, "Container exited with status #{status.exitstatus}"
+          end
         end
 
         display_success("Done")

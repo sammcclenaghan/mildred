@@ -31,8 +31,13 @@ class Agent
       task = line.strip
       next if task.empty?
 
-      response = @chat.ask(task)
-      $stdout.puts response.content
+      begin
+        response = @chat.ask(task)
+        $stdout.puts response.content
+      rescue => e
+        $stderr.puts "Error processing task: #{e.message}"
+        $stdout.puts "Error: #{e.message}"
+      end
     end
   end
 end
