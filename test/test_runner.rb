@@ -134,6 +134,43 @@ class TestRunner < Minitest::Test
     end
   end
 
+  def test_default_rules_path
+    expected = File.join(Dir.home, ".mildred", "rules.yml")
+    assert_equal expected, Mildred::Runner::DEFAULT_RULES_PATH
+  end
+
+  def test_initializes_with_noop_false_by_default
+    Dir.mktmpdir do |dir|
+      path = write_rules(dir, <<~YAML)
+        jobs:
+          - name: Clean Downloads
+            directory: /tmp/downloads
+            tasks:
+              - Delete duplicate files
+      YAML
+
+      runner = Mildred::Runner.new(path: path)
+
+      assert_equal false, runner.noop
+    end
+  end
+
+  def test_initializes_with_noop_true
+    Dir.mktmpdir do |dir|
+      path = write_rules(dir, <<~YAML)
+        jobs:
+          - name: Clean Downloads
+            directory: /tmp/downloads
+            tasks:
+              - Delete duplicate files
+      YAML
+
+      runner = Mildred::Runner.new(path: path, noop: true)
+
+      assert_equal true, runner.noop
+    end
+  end
+
   private
 
   def write_rules(dir, content)

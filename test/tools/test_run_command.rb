@@ -59,6 +59,23 @@ class TestRunCommand < Minitest::Test
     end
   end
 
+  def test_noop_mode_does_not_execute_command
+    Mildred::Current.noop = true
+    tool = Mildred::Tools::RunCommand.new
+
+    result = tool.execute(command: "echo should_not_run")
+
+    assert_includes result[:stdout], "[noop] would execute: echo should_not_run"
+    assert_equal 0, result[:exit_code]
+    assert_empty result[:stderr]
+
+    entries = Mildred.logger.entries
+    assert_equal 1, entries.length
+    assert_includes entries[0][:stdout], "[noop]"
+  ensure
+    Mildred::Current.reset
+  end
+
   def test_handles_glob_moves
     Dir.mktmpdir do |dir|
       FileUtils.mkdir_p(File.join(dir, "images"))

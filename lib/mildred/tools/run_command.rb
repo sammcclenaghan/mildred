@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require "gum"
 require "open3"
 
 module Mildred
@@ -10,6 +11,12 @@ module Mildred
       param :command, desc: "The shell command to execute"
 
       def execute(command:)
+        if Mildred::Current.noop
+          Mildred.logger.log(command, "[noop]", "", 0)
+          puts Gum.style("  → #{command}", foreground: "220")
+          return { stdout: "[noop] would execute: #{command}", stderr: "", exit_code: 0 }
+        end
+
         container_id = Mildred::Current.container_id
 
         stdout, stderr, status = if container_id

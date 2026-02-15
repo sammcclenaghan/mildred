@@ -4,24 +4,27 @@ require "gum"
 
 module Mildred
   class Runner
-    DEFAULT_RULES_PATH = File.join(".mildred", "rules.yml")
+    DEFAULT_RULES_PATH = File.join(Dir.home, ".mildred", "rules.yml")
 
-    attr_reader :jobs
+    attr_reader :jobs, :noop
 
-    def initialize(path: DEFAULT_RULES_PATH)
+    def initialize(path: DEFAULT_RULES_PATH, noop: false)
       @jobs = Job.from_yaml(path)
+      @noop = noop
     end
 
     def run
-      Container.cleanup_stale
-      Container.ensure_image
+      if @noop
+        puts Gum.style("▸ Dry run — no changes will be made", foreground: "220", bold: true)
+        puts
+      else
+        Gum.spin("Cleaning up stale containers...", spinner: :dot) { Container.cleanup_stale }
+        Gum.spin("Ensuring sandbox image...", spinner: :dot) { Container.ensure_image }
+        puts
+      end
 
-      @jobs.each do |job|
-        puts Gum.style(
-          "▸ #{job.name}",
-          foreground: "212",
-          bold: true
-        )
+      results = @jobs.map do |job|
+        puts Gum.style("▸ #{job.name}", foreground: "212", bold: true)
 
         result = Gum.spin("Running #{job.name}...", spinner: :dot) do
           execute_job(job)
@@ -32,16 +35,30 @@ module Mildred
         else
           puts Gum.style("  ✗ Failed", foreground: "196")
         end
+
+        result
+      end
+
+      passed = results.count { |r| r }
+      total = results.length
+      puts
+      if passed == total
+        puts Gum.style("✓ #{passed}/#{total} jobs completed", foreground: "46", bold: true)
+      else
+        puts Gum.style("⚠ #{passed}/#{total} jobs completed", foreground: "220", bold: true)
       end
     end
 
     private
 
     def execute_job(job)
-      container = Container.new(job: job)
-      container.start
-
-      Mildred::Current.container_id = container.id
+      if @noop
+        Mildred::Current.noop = true
+      else
+        container = Container.new(job: job)
+        container.start
+        Mildred::Current.container_id = container.id
+      end
 
       agent = Agent.build
       prompt = build_prompt(job)
@@ -51,7 +68,7 @@ module Mildred
       false
     ensure
       Mildred::Current.reset
-      container&.stop
+      container&.stop unless @noop
     end
 
     def build_prompt(job)

@@ -2,46 +2,182 @@
 # frozen_string_literal: true
 
 require "optparse"
+require "fileutils"
+require "yaml"
 require "mildred"
+require "gum"
 
 Mildred.configure!
+
+SAMPLE_RULES = <<~YAML
+  jobs:
+    - name: Clean Downloads
+      directory: ~/Downloads
+      tasks:
+        - Delete duplicate files
+        - Remove files older than 30 days
+
+    - name: Organize Documents
+      directory: ~/Documents
+      destinations:
+        - ~/Documents/PDFs
+        - ~/Documents/Spreadsheets
+      tasks:
+        - Move PDF files to the PDFs folder
+        - Move spreadsheet files to the Spreadsheets folder
+YAML
+
+MILDRED_DIR = File.join(Dir.home, ".mildred")
+LOG_PATH = File.join(MILDRED_DIR, "mildred.log")
+
+DEFAULT_MODELS = {
+  "ollama" => "llama3.1:8b",
+  "openai" => "gpt-4o",
+  "openrouter" => "anthropic/claude-sonnet-4"
+}.freeze
 
 command = ARGV.shift
 
 case command
 when "clean"
-  rules_path = nil
+  rules_path = Mildred::Runner::DEFAULT_RULES_PATH
+  noop = false
+  silent = false
 
   parser = OptionParser.new do |opts|
     opts.banner = "Usage: mildred clean [options]"
 
-    opts.on("-f", "Run with default rules (.mildred/rules.yml)") do
-      rules_path = Mildred::Runner::DEFAULT_RULES_PATH
+    opts.on("-n", "--noop", "Dry run — no changes will be made") do
+      noop = true
     end
 
-    opts.on("-rf FILE", "Run with a custom rules file") do |file|
+    opts.on("-r", "--rules FILE", "Use a custom rules file") do |file|
       rules_path = file
+    end
+
+    opts.on("-s", "--silent", "Suppress output") do
+      silent = true
     end
   end
 
   parser.parse!(ARGV)
 
-  unless rules_path
+  unless File.exist?(rules_path)
+    puts Gum.style("Error: Rules file not found: #{rules_path}", foreground: "196")
+    exit 1
+  end
+
+  runner = Mildred::Runner.new(path: rules_path, noop: noop)
+  runner.run
+
+when "version"
+  puts Mildred::VERSION
+
+when "setup"
+  puts Gum.style("Mildred Setup", foreground: "212", bold: true)
+  puts
+
+  provider = Gum.choose("ollama", "openai", "openrouter", header: "Choose a provider:")
+
+  unless provider
+    puts Gum.style("Setup cancelled.", foreground: "196")
+    exit 1
+  end
+
+  model = Gum.input(
+    placeholder: DEFAULT_MODELS[provider],
+    value: DEFAULT_MODELS[provider],
+    header: "Model:"
+  )
+
+  unless model && !model.empty?
+    puts Gum.style("Setup cancelled.", foreground: "196")
+    exit 1
+  end
+
+  config = { "provider" => provider, "model" => model }
+
+  case provider
+  when "ollama"
+    url = Gum.input(
+      placeholder: "http://localhost:11434/v1",
+      value: "http://localhost:11434/v1",
+      header: "Ollama URL:"
+    )
+    config["ollama_url"] = url if url && !url.empty?
+  when "openai"
+    key = Gum.input(header: "OpenAI API key:", password: true)
+    unless key && !key.empty?
+      puts Gum.style("API key is required.", foreground: "196")
+      exit 1
+    end
+    config["openai_api_key"] = key
+  when "openrouter"
+    key = Gum.input(header: "OpenRouter API key:", password: true)
+    unless key && !key.empty?
+      puts Gum.style("API key is required.", foreground: "196")
+      exit 1
+    end
+    config["openrouter_api_key"] = key
+  end
+
+  config_dir = Mildred::Configuration::CONFIG_DIR
+  FileUtils.mkdir_p(config_dir)
+  File.write(Mildred::Configuration::CONFIG_PATH, YAML.dump(config))
+  puts Gum.style("  ✓ Config written to #{Mildred::Configuration::CONFIG_PATH}", foreground: "46")
+
+  FileUtils.mkdir_p(MILDRED_DIR)
+  rules_path = Mildred::Runner::DEFAULT_RULES_PATH
+  unless File.exist?(rules_path)
+    File.write(rules_path, SAMPLE_RULES)
+    puts Gum.style("  ✓ Sample rules written to #{rules_path}", foreground: "46")
+  end
+
+  puts
+  puts Gum.style("Ready! Run `mildred clean` to get started.", foreground: "212", bold: true)
+
+when "sample"
+  FileUtils.mkdir_p(MILDRED_DIR)
+  sample_path = File.join(MILDRED_DIR, "rules.sample.yml")
+  File.write(sample_path, SAMPLE_RULES)
+
+  puts Gum.style("Sample rules file created at #{sample_path}", foreground: "46")
+
+when "logs"
+  path_only = false
+  tail = false
+
+  parser = OptionParser.new do |opts|
+    opts.banner = "Usage: mildred logs [options]"
+
+    opts.on("-p", "--path", "Show log file path") do
+      path_only = true
+    end
+
+    opts.on("-t", "--tail", "Tail the log file") do
+      tail = true
+    end
+  end
+
+  parser.parse!(ARGV)
+
+  if tail
+    exec "tail", "-f", LOG_PATH
+  elsif path_only
+    puts LOG_PATH
+  else
     puts parser.help
     exit 1
   end
 
-  unless File.exist?(rules_path)
-    puts "Rules file not found: #{rules_path}"
-    exit 1
-  end
-
-  runner = Mildred::Runner.new(path: rules_path)
-  runner.run
 else
-  puts "Usage: mildred <command>"
-  puts ""
+  header = Gum.style("Mildred - AI-powered file organizer", foreground: "212", bold: true)
+  puts header
+  puts
   puts "Commands:"
   puts "  clean    Organize files using rules"
-  exit 1
+  puts "  setup    Interactive first-time setup"
+  puts "  sample   Generate a sample rules file"
+  puts "  logs     Show or tail the log file"
+  puts "  version  Show version"
 end
