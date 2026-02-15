@@ -6,7 +6,7 @@ module Mildred
   class Configuration
     DEFAULTS = {
       "provider" => "ollama",
-      "model" => "llama3.2",
+      "model" => "llama3.1:8b",
       "ollama_url" => "http://localhost:11434/v1"
     }.freeze
 
