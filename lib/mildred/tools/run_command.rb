@@ -10,7 +10,13 @@ module Mildred
       param :command, desc: "The shell command to execute"
 
       def execute(command:)
-        stdout, stderr, status = Open3.capture3("bash", "-c", command)
+        container_id = Mildred::Current.container_id
+
+        stdout, stderr, status = if container_id
+          Open3.capture3("container", "exec", container_id, "bash", "-c", command)
+        else
+          Open3.capture3("bash", "-c", command)
+        end
 
         Mildred.logger.log(command, stdout, stderr, status.exitstatus)
 

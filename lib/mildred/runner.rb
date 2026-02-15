@@ -35,12 +35,20 @@ module Mildred
     private
 
     def execute_job(job)
+      container = Container.new(job: job)
+      container.start
+
+      Mildred::Current.container_id = container.id
+
       agent = Agent.build
       prompt = build_prompt(job)
       agent.ask(prompt)
       true
     rescue StandardError
       false
+    ensure
+      Mildred::Current.reset
+      container&.stop
     end
 
     def build_prompt(job)
