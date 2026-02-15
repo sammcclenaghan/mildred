@@ -1,9 +1,14 @@
 # Mildred
----
 
-There's nothing wrong with being lazy. Mildred can go above and beyond, following plain english prompts safely inside Apple Containers.
+**Be lazier.** Describe your rules in plain English, and Mildred handles the rest. Sandboxed with Apple containers.
 
-**macOS only.** Requires Apple containers.
+Like [Maid](https://github.com/maid/maid), but you write rules in English instead of Ruby. An LLM figures out the file operations and executes them inside a container so nothing unexpected touches your filesystem.
+
+## Requirements
+
+- macOS (Apple containers)
+- Ruby 3.1+
+- An LLM provider: [Ollama](https://ollama.com), OpenAI, or OpenRouter
 
 ## Install
 
@@ -11,17 +16,15 @@ There's nothing wrong with being lazy. Mildred can go above and beyond, followin
 gem install mildred
 ```
 
-## Setup
+## Getting started
+
+Run the interactive setup to pick your provider and model:
 
 ```
 mildred setup
 ```
 
-This walks you through picking a provider (ollama, openai, or openrouter) and writes config to `~/.mildred/`.
-
-## Usage
-
-Define jobs in `~/.mildred/rules.yml`:
+This creates `~/.mildred/config.yml` and a sample `~/.mildred/rules.yml`:
 
 ```yaml
 jobs:
@@ -41,22 +44,32 @@ jobs:
       - Move spreadsheet files to the Spreadsheets folder
 ```
 
-Then run:
+Try a dry run first to see what would happen:
+
+```
+mildred clean --noop
+```
+
+```
+▸ Dry run — no changes will be made
+
+▸ Clean Downloads
+  → find ~/Downloads -type f -name "*.pdf" -mtime +30
+  → rm /Users/you/Downloads/old-invoice.pdf
+  ✓ Done
+
+▸ Organize Documents
+  → mv /Users/you/Documents/report.pdf /Users/you/Documents/PDFs/
+  → mv /Users/you/Documents/budget.xlsx /Users/you/Documents/Spreadsheets/
+  ✓ Done
+
+✓ 2/2 jobs completed
+```
+
+When you're happy with it, run for real:
 
 ```
 mildred clean
-```
-
-Use `--noop` for a dry run.
-
-## Commands
-
-```
-mildred clean    # Organize files using rules
-mildred setup    # Interactive first-time setup
-mildred sample   # Generate sample config and rules
-mildred logs     # Show or tail the log file
-mildred version  # Show version
 ```
 
 ## License
