@@ -2,8 +2,8 @@ PATH
   remote: .
   specs:
     mildred (0.1.0)
-      activesupport
-      gum
+      activesupport (~> 8.0)
+      gum (~> 0.3)
       ruby_llm (~> 1.9)
 
 GEM

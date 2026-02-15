@@ -27,6 +27,22 @@ SAMPLE_RULES = <<~YAML
         - Move spreadsheet files to the Spreadsheets folder
 YAML
 
+SAMPLE_CONFIG = <<~YAML
+  # Mildred configuration
+  # Provider: ollama, openai, or openrouter
+  provider: ollama
+  model: llama3.1:8b
+
+  # Ollama settings
+  ollama_url: http://localhost:11434/v1
+
+  # OpenAI settings
+  # openai_api_key: sk-...
+
+  # OpenRouter settings
+  # openrouter_api_key: sk-or-...
+YAML
+
 MILDRED_DIR = File.join(Dir.home, ".mildred")
 LOG_PATH = File.join(MILDRED_DIR, "mildred.log")
 
@@ -138,10 +154,14 @@ when "setup"
 
 when "sample"
   FileUtils.mkdir_p(MILDRED_DIR)
-  sample_path = File.join(MILDRED_DIR, "rules.sample.yml")
-  File.write(sample_path, SAMPLE_RULES)
 
-  puts Gum.style("Sample rules file created at #{sample_path}", foreground: "46")
+  rules_sample = File.join(MILDRED_DIR, "rules.sample.yml")
+  File.write(rules_sample, SAMPLE_RULES)
+  puts Gum.style("  ✓ #{rules_sample}", foreground: "46")
+
+  config_sample = File.join(MILDRED_DIR, "config.sample.yml")
+  File.write(config_sample, SAMPLE_CONFIG)
+  puts Gum.style("  ✓ #{config_sample}", foreground: "46")
 
 when "logs"
   path_only = false
@@ -166,8 +186,11 @@ when "logs"
   elsif path_only
     puts LOG_PATH
   else
-    puts parser.help
-    exit 1
+    unless File.exist?(LOG_PATH)
+      puts Gum.style("No log file found at #{LOG_PATH}", foreground: "196")
+      exit 1
+    end
+    Gum.pager(File.read(LOG_PATH), show_line_numbers: true, soft_wrap: true)
   end
 
 else
@@ -177,7 +200,7 @@ else
   puts "Commands:"
   puts "  clean    Organize files using rules"
   puts "  setup    Interactive first-time setup"
-  puts "  sample   Generate a sample rules file"
+  puts "  sample   Generate sample config and rules files"
   puts "  logs     Show or tail the log file"
   puts "  version  Show version"
 end

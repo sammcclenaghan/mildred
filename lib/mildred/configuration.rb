@@ -10,7 +10,7 @@ module Mildred
       "ollama_url" => "http://localhost:11434/v1"
     }.freeze
 
-    CONFIG_DIR = File.join(Dir.home, ".config", "mildred")
+    CONFIG_DIR = File.join(Dir.home, ".mildred")
     CONFIG_PATH = File.join(CONFIG_DIR, "config.yml")
 
     attr_reader :provider, :model, :settings

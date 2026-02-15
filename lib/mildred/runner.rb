@@ -30,13 +30,14 @@ module Mildred
           execute_job(job)
         end
 
-        if result
+        if result == true
           puts Gum.style("  ✓ Done", foreground: "46")
         else
           puts Gum.style("  ✗ Failed", foreground: "196")
+          puts Gum.style("    #{result.message}", foreground: "196", faint: true) if result.is_a?(StandardError)
         end
 
-        result
+        result == true
       end
 
       passed = results.count { |r| r }
@@ -51,7 +52,12 @@ module Mildred
 
     private
 
+    MAX_RETRIES = 2
+
     def execute_job(job)
+      Mildred::Current.job_name = job.name
+      Mildred.logger.log_job_start(job.name)
+
       if @noop
         Mildred::Current.noop = true
       else
@@ -60,15 +66,29 @@ module Mildred
         Mildred::Current.container_id = container.id
       end
 
-      agent = Agent.build
-      prompt = build_prompt(job)
-      agent.ask(prompt)
+      run_agent(job)
+
+      Mildred.logger.log_job_end(job.name, success: true)
       true
-    rescue StandardError
-      false
+    rescue StandardError => e
+      Mildred.logger.log_job_end(job.name, success: false, error: e.message)
+      e
     ensure
       Mildred::Current.reset
       container&.stop unless @noop
+    end
+
+    def run_agent(job, attempt: 1)
+      agent = Agent.build
+      prompt = build_prompt(job)
+      agent.ask(prompt)
+    rescue StandardError => e
+      raise unless attempt < MAX_RETRIES
+
+      Mildred.logger.log(
+        "retry", "[attempt #{attempt} failed: #{e.message}]", "", 0
+      )
+      run_agent(job, attempt: attempt + 1)
     end
 
     def build_prompt(job)

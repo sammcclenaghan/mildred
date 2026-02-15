@@ -17,7 +17,7 @@ Gem::Specification.new do |spec|
   spec.metadata["allowed_push_host"] = "TODO: Set to your gem server 'https://example.com'"
 
   spec.metadata["homepage_uri"] = spec.homepage
-  spec.metadata["source_code_uri"] = "https://rubygems.org/gems/mildred"
+  spec.metadata["source_code_uri"] = "https://github.com/sammcclenaghan/mildred"
 
   # Specify which files should be added to the gem when it is released.
   # The `git ls-files -z` loads the files in the RubyGem that have been added into git.
@@ -33,8 +33,8 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   spec.add_dependency "ruby_llm", "~> 1.9"
-  spec.add_dependency "activesupport"
-  spec.add_dependency "gum"
+  spec.add_dependency "activesupport", "~> 8.0"
+  spec.add_dependency "gum", "~> 0.3"
 
   # For more information and examples about making a new gem, check out our
   # guide at: https://bundler.io/guides/creating_gem.html
