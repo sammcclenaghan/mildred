@@ -8,16 +8,16 @@ Gem::Specification.new do |spec|
   spec.authors = ["Sam McClenaghan"]
   spec.email = ["sam@aream.ca"]
 
-  spec.summary = "Mildred summary"
-  spec.description = "Mildred power organizer"
-  spec.homepage = "https://rubygems.org/gems/mildred"
+  spec.summary = "AI-powered file organizer. Describe what you want, and Mildred does it."
+  spec.description = "Be lazier. A little more active maid, let mildred take care of you. Inspired by Maid, describe tasks in plain english. Runs securely in Apple containers"
+  spec.homepage = "https://github.com/sammcclenaghan/mildred"
   spec.license = "MIT"
   spec.required_ruby_version = ">= 3.1.0"
 
-  spec.metadata["allowed_push_host"] = "TODO: Set to your gem server 'https://example.com'"
-
+  spec.metadata["allowed_push_host"] = "https://rubygems.org"
   spec.metadata["homepage_uri"] = spec.homepage
   spec.metadata["source_code_uri"] = "https://github.com/sammcclenaghan/mildred"
+  spec.metadata["changelog_uri"] = "https://github.com/sammcclenaghan/mildred/blob/main/CHANGELOG.md"
 
   # Specify which files should be added to the gem when it is released.
   # The `git ls-files -z` loads the files in the RubyGem that have been added into git.

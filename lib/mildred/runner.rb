@@ -95,9 +95,7 @@ module Mildred
       lines = []
       lines << "You are organizing the directory: #{job.directory}"
 
-      unless job.destinations.empty?
-        lines << "Available destinations: #{job.destinations.join(', ')}"
-      end
+      lines << "Available destinations: #{job.destinations.join(", ")}" unless job.destinations.empty?
 
       lines << ""
       lines << "Complete the following tasks:"

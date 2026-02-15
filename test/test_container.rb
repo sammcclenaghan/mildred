@@ -66,10 +66,9 @@ class TestContainer < Minitest::Test
 
   def build_job(directory:, destinations:)
     Mildred::Job.send(:new,
-      name: "Test Job",
-      directory: directory,
-      destinations: destinations,
-      tasks: ["test task"]
-    )
+                      name: "Test Job",
+                      directory: directory,
+                      destinations: destinations,
+                      tasks: ["test task"])
   end
 end
