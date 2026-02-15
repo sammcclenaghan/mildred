@@ -7,21 +7,23 @@ module Mildred
   class Container
     class Error < StandardError; end
 
-    DEFAULT_IMAGE = "alpine:3.20"
+    IMAGE = "mildred-sandbox:latest"
+
+    CONTAINERFILE = <<~DOCKERFILE
+      FROM alpine:3.20
+      RUN apk add --no-cache bash coreutils findutils
+    DOCKERFILE
 
     attr_reader :id
 
-    def initialize(job:, image: DEFAULT_IMAGE)
+    def initialize(job:)
       @job = job
-      @image = image
       @id = nil
     end
 
     def start
       ensure_mount_paths_exist
       @id = run_container
-      install_packages
-      @id
     end
 
     def stop
@@ -30,6 +32,52 @@ module Mildred
       run_cli("container", "stop", @id)
       run_cli("container", "rm", @id)
       @id = nil
+    end
+
+    def self.ensure_image
+      return if image_exists?
+
+      build_image
+    end
+
+    def self.cleanup_stale
+      ids = stale_container_ids
+      return if ids.empty?
+
+      ids.each do |id|
+        Open3.capture3("container", "stop", id)
+        Open3.capture3("container", "rm", id)
+      end
+    end
+
+    class << self
+      private
+
+      def image_exists?
+        stdout, _, status = Open3.capture3("container", "image", "list", "--format", "json")
+        return false unless status.success?
+
+        images = JSON.parse(stdout)
+        images.any? { |img| img["reference"]&.end_with?(IMAGE) }
+      end
+
+      def build_image
+        Dir.mktmpdir do |dir|
+          File.write(File.join(dir, "Containerfile"), CONTAINERFILE)
+
+          _stdout, stderr, status = Open3.capture3(
+            "container", "build", "-t", IMAGE, dir
+          )
+          raise Error, "Failed to build image: #{stderr}" unless status.success?
+        end
+      end
+
+      def stale_container_ids
+        stdout, _, status = Open3.capture3("container", "ls", "-a", "--quiet")
+        return [] unless status.success?
+
+        stdout.lines.map(&:strip).select { |id| id.start_with?("mildred-") }
+      end
     end
 
     private
@@ -44,20 +92,12 @@ module Mildred
 
       args = ["container", "run", "-d", "--name", name]
       args.concat(mount_args)
-      args.concat([@image, "sh", "-c", "sleep infinity"])
+      args.concat([IMAGE, "sleep", "infinity"])
 
       _stdout, stderr, status = Open3.capture3(*args)
       raise Error, "Failed to start container: #{stderr}" unless status.success?
 
       name
-    end
-
-    def install_packages
-      _stdout, stderr, status = Open3.capture3(
-        "container", "exec", @id, "sh", "-c",
-        "apk add --no-cache bash coreutils findutils"
-      )
-      raise Error, "Failed to install packages: #{stderr}" unless status.success?
     end
 
     def mount_args

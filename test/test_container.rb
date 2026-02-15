@@ -45,18 +45,21 @@ class TestContainer < Minitest::Test
     assert_equal expected, mount_args
   end
 
-  def test_accepts_custom_image
-    job = build_job(directory: "/tmp/downloads", destinations: [])
-    container = Mildred::Container.new(job: job, image: "ubuntu:24.04")
-
-    assert_instance_of Mildred::Container, container
-  end
-
   def test_stop_is_safe_when_not_started
     job = build_job(directory: "/tmp/downloads", destinations: [])
     container = Mildred::Container.new(job: job)
 
     assert_nil container.stop
+  end
+
+  def test_containerfile_installs_bash
+    assert_includes Mildred::Container::CONTAINERFILE, "bash"
+    assert_includes Mildred::Container::CONTAINERFILE, "coreutils"
+    assert_includes Mildred::Container::CONTAINERFILE, "findutils"
+  end
+
+  def test_cleanup_stale_does_not_error_with_no_stale_containers
+    Mildred::Container.cleanup_stale
   end
 
   private

@@ -13,6 +13,9 @@ module Mildred
     end
 
     def run
+      Container.cleanup_stale
+      Container.ensure_image
+
       @jobs.each do |job|
         puts Gum.style(
           "▸ #{job.name}",
