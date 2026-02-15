@@ -1,0 +1,105 @@
+---
+http_interactions:
+- request:
+    method: post
+    uri: http://localhost:11434/v1/chat/completions
+    body:
+      encoding: UTF-8
+      string: '{"model":"llama3.1:8b","messages":[{"role":"system","content":"You
+        are Mildred, an intelligent file organization assistant.\nYou help users clean
+        up and organize their files and directories.\n\nWhen asked to organize files,
+        you should:\n1. First list and inspect the files in the target directory\n2.
+        Analyze file types, names, dates, and sizes\n3. Propose an organization plan
+        before making changes\n4. Only move or rename files after the user confirms\n\nBe
+        concise and clear in your responses.\n"},{"role":"user","content":"List all
+        the files in /Users/sammcclenaghan/code/primary/mildred/test/fixtures/sample_dir"}],"stream":false,"tools":[{"type":"function","function":{"name":"mildred--tools--list_files","description":"Lists
+        files and directories at a given path","parameters":{"type":"object","properties":{"path":{"type":"string","description":"The
+        directory path to list"},"show_hidden":{"type":"boolean","description":"Include
+        hidden files"}},"required":["path"],"additionalProperties":false,"strict":true}}},{"type":"function","function":{"name":"mildred--tools--file_metadata","description":"Gets
+        detailed metadata for a file or directory","parameters":{"type":"object","properties":{"path":{"type":"string","description":"The
+        file or directory path to inspect"}},"required":["path"],"additionalProperties":false,"strict":true}}},{"type":"function","function":{"name":"mildred--tools--move_file","description":"Moves
+        or renames a file or directory","parameters":{"type":"object","properties":{"source":{"type":"string","description":"The
+        current path of the file or directory"},"destination":{"type":"string","description":"The
+        target path to move or rename to"}},"required":["source","destination"],"additionalProperties":false,"strict":true}}}]}'
+    headers:
+      User-Agent:
+      - Faraday v2.14.1
+      Content-Type:
+      - application/json
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - application/json
+      Date:
+      - Sun, 15 Feb 2026 06:47:40 GMT
+      Content-Length:
+      - '527'
+    body:
+      encoding: UTF-8
+      string: '{"id":"chatcmpl-446","object":"chat.completion","created":1771138060,"model":"llama3.1:8b","system_fingerprint":"fp_ollama","choices":[{"index":0,"message":{"role":"assistant","content":"","tool_calls":[{"id":"call_1j9lr1i7","index":0,"type":"function","function":{"name":"mildred--tools--list_files","arguments":"{\"path\":\"/Users/sammcclenaghan/code/primary/mildred/test/fixtures/sample_dir\",\"show_hidden\":true}"}}]},"finish_reason":"tool_calls"}],"usage":{"prompt_tokens":409,"completion_tokens":46,"total_tokens":455}}
+
+        '
+  recorded_at: Sun, 15 Feb 2026 06:47:40 GMT
+- request:
+    method: post
+    uri: http://localhost:11434/v1/chat/completions
+    body:
+      encoding: UTF-8
+      string: '{"model":"llama3.1:8b","messages":[{"role":"system","content":"You
+        are Mildred, an intelligent file organization assistant.\nYou help users clean
+        up and organize their files and directories.\n\nWhen asked to organize files,
+        you should:\n1. First list and inspect the files in the target directory\n2.
+        Analyze file types, names, dates, and sizes\n3. Propose an organization plan
+        before making changes\n4. Only move or rename files after the user confirms\n\nBe
+        concise and clear in your responses.\n"},{"role":"user","content":"List all
+        the files in /Users/sammcclenaghan/code/primary/mildred/test/fixtures/sample_dir"},{"role":"assistant","content":"","tool_calls":[{"id":"call_1j9lr1i7","type":"function","function":{"name":"mildred--tools--list_files","arguments":"{\"path\":\"/Users/sammcclenaghan/code/primary/mildred/test/fixtures/sample_dir\",\"show_hidden\":true}"}}]},{"role":"tool","content":"[{name:
+        \".\", type: \"directory\", size: nil}, {name: \"..\", type: \"directory\",
+        size: nil}, {name: \"document.pdf\", type: \"file\", size: 13}, {name: \"notes.txt\",
+        type: \"file\", size: 10}, {name: \"photo.jpg\", type: \"file\", size: 15}]","tool_call_id":"call_1j9lr1i7"}],"stream":false,"tools":[{"type":"function","function":{"name":"mildred--tools--list_files","description":"Lists
+        files and directories at a given path","parameters":{"type":"object","properties":{"path":{"type":"string","description":"The
+        directory path to list"},"show_hidden":{"type":"boolean","description":"Include
+        hidden files"}},"required":["path"],"additionalProperties":false,"strict":true}}},{"type":"function","function":{"name":"mildred--tools--file_metadata","description":"Gets
+        detailed metadata for a file or directory","parameters":{"type":"object","properties":{"path":{"type":"string","description":"The
+        file or directory path to inspect"}},"required":["path"],"additionalProperties":false,"strict":true}}},{"type":"function","function":{"name":"mildred--tools--move_file","description":"Moves
+        or renames a file or directory","parameters":{"type":"object","properties":{"source":{"type":"string","description":"The
+        current path of the file or directory"},"destination":{"type":"string","description":"The
+        target path to move or rename to"}},"required":["source","destination"],"additionalProperties":false,"strict":true}}}]}'
+    headers:
+      User-Agent:
+      - Faraday v2.14.1
+      Content-Type:
+      - application/json
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - application/json
+      Date:
+      - Sun, 15 Feb 2026 06:47:45 GMT
+      Content-Length:
+      - '640'
+    body:
+      encoding: UTF-8
+      string: '{"id":"chatcmpl-651","object":"chat.completion","created":1771138065,"model":"llama3.1:8b","system_fingerprint":"fp_ollama","choices":[{"index":0,"message":{"role":"assistant","content":"It
+        appears that the /Users/sammcclenaghan/code/primary/mildred/test/fixtures/sample_dir
+        directory contains four files and two subdirectories:\n\n- document.pdf (13
+        bytes)\n- notes.txt (10 bytes)\n- photo.jpg (15 bytes)\n- The . and .. directories
+        are standard directory entries, referring to the current directory (.) and
+        its parent (..), respectively."},"finish_reason":"stop"}],"usage":{"prompt_tokens":301,"completion_tokens":79,"total_tokens":380}}
+
+        '
+  recorded_at: Sun, 15 Feb 2026 06:47:45 GMT
+recorded_with: VCR 6.4.0

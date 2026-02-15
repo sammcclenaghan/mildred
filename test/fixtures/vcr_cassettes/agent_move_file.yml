@@ -1,0 +1,103 @@
+---
+http_interactions:
+- request:
+    method: post
+    uri: http://localhost:11434/v1/chat/completions
+    body:
+      encoding: UTF-8
+      string: '{"model":"llama3.1:8b","messages":[{"role":"system","content":"You
+        are Mildred, an intelligent file organization assistant.\nYou help users clean
+        up and organize their files and directories.\n\nWhen asked to organize files,
+        you should:\n1. First list and inspect the files in the target directory\n2.
+        Analyze file types, names, dates, and sizes\n3. Propose an organization plan
+        before making changes\n4. Only move or rename files after the user confirms\n\nBe
+        concise and clear in your responses.\n"},{"role":"user","content":"Move /Users/sammcclenaghan/code/primary/mildred/test/fixtures/sample_dir/notes.txt
+        to /Users/sammcclenaghan/code/primary/mildred/test/fixtures/sample_dir/archive/notes.txt"}],"stream":false,"tools":[{"type":"function","function":{"name":"mildred--tools--list_files","description":"Lists
+        files and directories at a given path","parameters":{"type":"object","properties":{"path":{"type":"string","description":"The
+        directory path to list"},"show_hidden":{"type":"boolean","description":"Include
+        hidden files"}},"required":["path"],"additionalProperties":false,"strict":true}}},{"type":"function","function":{"name":"mildred--tools--file_metadata","description":"Gets
+        detailed metadata for a file or directory","parameters":{"type":"object","properties":{"path":{"type":"string","description":"The
+        file or directory path to inspect"}},"required":["path"],"additionalProperties":false,"strict":true}}},{"type":"function","function":{"name":"mildred--tools--move_file","description":"Moves
+        or renames a file or directory","parameters":{"type":"object","properties":{"source":{"type":"string","description":"The
+        current path of the file or directory"},"destination":{"type":"string","description":"The
+        target path to move or rename to"}},"required":["source","destination"],"additionalProperties":false,"strict":true}}}]}'
+    headers:
+      User-Agent:
+      - Faraday v2.14.1
+      Content-Type:
+      - application/json
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - application/json
+      Date:
+      - Sun, 15 Feb 2026 06:47:16 GMT
+      Content-Length:
+      - '623'
+    body:
+      encoding: UTF-8
+      string: '{"id":"chatcmpl-876","object":"chat.completion","created":1771138036,"model":"llama3.1:8b","system_fingerprint":"fp_ollama","choices":[{"index":0,"message":{"role":"assistant","content":"","tool_calls":[{"id":"call_joczf51m","index":0,"type":"function","function":{"name":"mildred--tools--move_file","arguments":"{\"source\":\"/Users/sammcclenaghan/code/primary/mildred/test/fixtures/sample_dir/notes.txt\",\"destination\":\"/Users/sammcclenaghan/code/primary/mildred/test/fixtures/sample_dir/archive/notes.txt\"}"}}]},"finish_reason":"tool_calls"}],"usage":{"prompt_tokens":431,"completion_tokens":68,"total_tokens":499}}
+
+        '
+  recorded_at: Sun, 15 Feb 2026 06:47:16 GMT
+- request:
+    method: post
+    uri: http://localhost:11434/v1/chat/completions
+    body:
+      encoding: UTF-8
+      string: '{"model":"llama3.1:8b","messages":[{"role":"system","content":"You
+        are Mildred, an intelligent file organization assistant.\nYou help users clean
+        up and organize their files and directories.\n\nWhen asked to organize files,
+        you should:\n1. First list and inspect the files in the target directory\n2.
+        Analyze file types, names, dates, and sizes\n3. Propose an organization plan
+        before making changes\n4. Only move or rename files after the user confirms\n\nBe
+        concise and clear in your responses.\n"},{"role":"user","content":"Move /Users/sammcclenaghan/code/primary/mildred/test/fixtures/sample_dir/notes.txt
+        to /Users/sammcclenaghan/code/primary/mildred/test/fixtures/sample_dir/archive/notes.txt"},{"role":"assistant","content":"","tool_calls":[{"id":"call_joczf51m","type":"function","function":{"name":"mildred--tools--move_file","arguments":"{\"source\":\"/Users/sammcclenaghan/code/primary/mildred/test/fixtures/sample_dir/notes.txt\",\"destination\":\"/Users/sammcclenaghan/code/primary/mildred/test/fixtures/sample_dir/archive/notes.txt\"}"}}]},{"role":"tool","content":"{moved:
+        \"/Users/sammcclenaghan/code/primary/mildred/test/fixtures/sample_dir/notes.txt\",
+        to: \"/Users/sammcclenaghan/code/primary/mildred/test/fixtures/sample_dir/archive/notes.txt\"}","tool_call_id":"call_joczf51m"}],"stream":false,"tools":[{"type":"function","function":{"name":"mildred--tools--list_files","description":"Lists
+        files and directories at a given path","parameters":{"type":"object","properties":{"path":{"type":"string","description":"The
+        directory path to list"},"show_hidden":{"type":"boolean","description":"Include
+        hidden files"}},"required":["path"],"additionalProperties":false,"strict":true}}},{"type":"function","function":{"name":"mildred--tools--file_metadata","description":"Gets
+        detailed metadata for a file or directory","parameters":{"type":"object","properties":{"path":{"type":"string","description":"The
+        file or directory path to inspect"}},"required":["path"],"additionalProperties":false,"strict":true}}},{"type":"function","function":{"name":"mildred--tools--move_file","description":"Moves
+        or renames a file or directory","parameters":{"type":"object","properties":{"source":{"type":"string","description":"The
+        current path of the file or directory"},"destination":{"type":"string","description":"The
+        target path to move or rename to"}},"required":["source","destination"],"additionalProperties":false,"strict":true}}}]}'
+    headers:
+      User-Agent:
+      - Faraday v2.14.1
+      Content-Type:
+      - application/json
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - application/json
+      Date:
+      - Sun, 15 Feb 2026 06:47:20 GMT
+      Content-Length:
+      - '581'
+    body:
+      encoding: UTF-8
+      string: '{"id":"chatcmpl-406","object":"chat.completion","created":1771138040,"model":"llama3.1:8b","system_fingerprint":"fp_ollama","choices":[{"index":0,"message":{"role":"assistant","content":"I
+        have moved the file \"notes.txt\" to the specified archive directory. \n\nHowever,
+        I would recommend reviewing your files and directories to determine if this
+        move is appropriate for all future reference. A better approach might be to
+        simply remove the unnecessary file instead of moving it."},"finish_reason":"stop"}],"usage":{"prompt_tokens":317,"completion_tokens":55,"total_tokens":372}}
+
+        '
+  recorded_at: Sun, 15 Feb 2026 06:47:20 GMT
+recorded_with: VCR 6.4.0
