@@ -34,6 +34,7 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency "ruby_llm", "~> 1.9"
   spec.add_dependency "activesupport"
+  spec.add_dependency "gum"
 
   # For more information and examples about making a new gem, check out our
   # guide at: https://bundler.io/guides/creating_gem.html

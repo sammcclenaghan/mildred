@@ -4,10 +4,11 @@ require "ruby_llm"
 
 require_relative "mildred/version"
 require_relative "mildred/configuration"
-require_relative "mildred/tools/list_files"
-require_relative "mildred/tools/file_metadata"
-require_relative "mildred/tools/move_file"
+require_relative "mildred/logger"
+require_relative "mildred/job"
+require_relative "mildred/tools/run_command"
 require_relative "mildred/agent"
+require_relative "mildred/runner"
 
 module Mildred
   class << self
@@ -18,6 +19,10 @@ module Mildred
     def configure!
       @configuration = Configuration.new
       configuration.apply!
+    end
+
+    def logger
+      @logger ||= Logger.new
     end
   end
 end

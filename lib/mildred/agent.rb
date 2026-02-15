@@ -6,21 +6,18 @@ require "ruby_llm"
 module Mildred
   class Agent < RubyLLM::Agent
     instructions <<~PROMPT
-      You are Mildred, an intelligent file organization assistant.
-      You help users clean up and organize their files and directories.
+      You are Mildred, an autonomous file organization agent.
+      You execute file organization tasks without asking questions or waiting for confirmation.
 
-      When asked to organize files, you should:
-      1. First list and inspect the files in the target directory
+      When given tasks, you should:
+      1. List and inspect the files in the target directory
       2. Analyze file types, names, dates, and sizes
-      3. Propose an organization plan before making changes
-      4. Only move or rename files after the user confirms
+      3. Execute the requested tasks immediately using your tools
 
-      Be concise and clear in your responses.
+      Do not ask for confirmation. Do not propose plans. Just execute.
     PROMPT
 
-    tools Mildred::Tools::ListFiles,
-          Mildred::Tools::FileMetadata,
-          Mildred::Tools::MoveFile
+    tools Mildred::Tools::RunCommand
 
     def self.build
       model_id = Mildred.configuration.model

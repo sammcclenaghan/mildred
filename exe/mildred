@@ -1,3 +1,47 @@
 #!/usr/bin/env ruby
+# frozen_string_literal: true
 
+require "optparse"
 require "mildred"
+
+Mildred.configure!
+
+command = ARGV.shift
+
+case command
+when "clean"
+  rules_path = nil
+
+  parser = OptionParser.new do |opts|
+    opts.banner = "Usage: mildred clean [options]"
+
+    opts.on("-f", "Run with default rules (.mildred/rules.yml)") do
+      rules_path = Mildred::Runner::DEFAULT_RULES_PATH
+    end
+
+    opts.on("-rf FILE", "Run with a custom rules file") do |file|
+      rules_path = file
+    end
+  end
+
+  parser.parse!(ARGV)
+
+  unless rules_path
+    puts parser.help
+    exit 1
+  end
+
+  unless File.exist?(rules_path)
+    puts "Rules file not found: #{rules_path}"
+    exit 1
+  end
+
+  runner = Mildred::Runner.new(path: rules_path)
+  runner.run
+else
+  puts "Usage: mildred <command>"
+  puts ""
+  puts "Commands:"
+  puts "  clean    Organize files using rules"
+  exit 1
+end
