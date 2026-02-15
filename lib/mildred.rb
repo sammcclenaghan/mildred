@@ -1,5 +1,9 @@
 # frozen_string_literal: true
 
+unless RUBY_PLATFORM.match?(/darwin/)
+  raise "Mildred requires macOS (Apple containers). See https://github.com/sammcclenaghan/mildred"
+end
+
 require "ruby_llm"
 
 require_relative "mildred/version"

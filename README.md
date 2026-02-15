@@ -1,43 +1,64 @@
 # Mildred
+---
 
-TODO: Delete this and the text below, and describe your gem
+There's nothing wrong with being lazy. Mildred can go above and beyond, following plain english prompts safely inside Apple Containers.
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/mildred`. To experiment with that code, run `bin/console` for an interactive prompt.
+**macOS only.** Requires Apple containers.
 
-## Installation
+## Install
 
-TODO: Replace `UPDATE_WITH_YOUR_GEM_NAME_IMMEDIATELY_AFTER_RELEASE_TO_RUBYGEMS_ORG` with your gem name right after releasing it to RubyGems.org. Please do not do it earlier due to security reasons. Alternatively, replace this section with instructions to install your gem from git if you don't plan to release to RubyGems.org.
-
-Install the gem and add to the application's Gemfile by executing:
-
-```bash
-bundle add UPDATE_WITH_YOUR_GEM_NAME_IMMEDIATELY_AFTER_RELEASE_TO_RUBYGEMS_ORG
+```
+gem install mildred
 ```
 
-If bundler is not being used to manage dependencies, install the gem by executing:
+## Setup
 
-```bash
-gem install UPDATE_WITH_YOUR_GEM_NAME_IMMEDIATELY_AFTER_RELEASE_TO_RUBYGEMS_ORG
 ```
+mildred setup
+```
+
+This walks you through picking a provider (ollama, openai, or openrouter) and writes config to `~/.mildred/`.
 
 ## Usage
 
-TODO: Write usage instructions here
+Define jobs in `~/.mildred/rules.yml`:
 
-## Development
+```yaml
+jobs:
+  - name: Clean Downloads
+    directory: ~/Downloads
+    tasks:
+      - Delete duplicate files
+      - Remove files older than 30 days
 
-After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake test` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
+  - name: Organize Documents
+    directory: ~/Documents
+    destinations:
+      - ~/Documents/PDFs
+      - ~/Documents/Spreadsheets
+    tasks:
+      - Move PDF files to the PDFs folder
+      - Move spreadsheet files to the Spreadsheets folder
+```
 
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and the created tag, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+Then run:
 
-## Contributing
+```
+mildred clean
+```
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/mildred. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [code of conduct](https://github.com/[USERNAME]/mildred/blob/main/CODE_OF_CONDUCT.md).
+Use `--noop` for a dry run.
+
+## Commands
+
+```
+mildred clean    # Organize files using rules
+mildred setup    # Interactive first-time setup
+mildred sample   # Generate sample config and rules
+mildred logs     # Show or tail the log file
+mildred version  # Show version
+```
 
 ## License
 
-The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
-
-## Code of Conduct
-
-Everyone interacting in the Mildred project's codebases, issue trackers, chat rooms and mailing lists is expected to follow the [code of conduct](https://github.com/[USERNAME]/mildred/blob/main/CODE_OF_CONDUCT.md).
+MIT
