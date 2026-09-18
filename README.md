@@ -1,5 +1,7 @@
 # Mildred
 
+[![CI](https://github.com/sammcclenaghan/mildred/actions/workflows/ci.yml/badge.svg)](https://github.com/sammcclenaghan/mildred/actions/workflows/ci.yml)
+
 A small AI file organizer that runs in a sandboxed [Apple Container](https://github.com/apple/container). Describe cleanup jobs in plain English in a YAML file, and a local model sorts your files. Only the folders you name are mounted into the container, so the model cannot see or touch anything else.
 
 ## Requirements
