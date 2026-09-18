@@ -1,5 +1,7 @@
 jobs:
   - name: Download Cleanup
-    directory: ~/Downloads
+    directories:
+      downloads: ~/Downloads
+      documents: ~/Documents/mildred-test
     tasks:
-      - Name one file in my downloads
+      - Move any documents or presentations from downloads to documents

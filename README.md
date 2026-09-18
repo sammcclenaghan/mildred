@@ -1,103 +1,71 @@
 # Mildred
 
-AI file organizer that runs in a sandboxed [Apple Container](https://github.com/apple/container). Define cleanup jobs in a YAML config and let an LLM sort your files.
+A small AI file organizer that runs in a sandboxed [Apple Container](https://github.com/apple/container). Describe cleanup jobs in plain English in a YAML file, and a local model sorts your files. Only the folders you name are mounted into the container, so the model cannot see or touch anything else.
 
 ## Requirements
 
-- macOS 26+ (Apple Silicon)
+- macOS 26+ on Apple Silicon
 - [Apple Container CLI](https://github.com/apple/container)
-- [Ollama](https://ollama.com) with a model pulled (default: `qwen3:latest`)
+- [Ollama](https://ollama.com) with a model pulled (default `qwen2.5:7b`)
 - Ruby 3.0+
 
-## Install
+## Quick start
 
 ```bash
 gem install mildred
+mildred init      # writes a starter mildred.yml
+mildred clean -n  # preview what would happen
+mildred clean     # do it
 ```
 
-## Quick Start
-
-```bash
-# Generate a starter config
-mildred init
-
-# Edit mildred.yml to your liking, then run
-mildred clean
-```
+The first `clean` builds the container image, which takes a minute.
 
 ## Commands
 
-| Command | Description |
-|---------|-------------|
-| `mildred init` | Generate a starter `mildred.yml` |
-| `mildred clean` | Run file organization jobs |
-| `mildred clean -n` | Dry run — preview without moving files |
-| `mildred build` | Rebuild the container image |
+| Command | What it does |
+|---|---|
+| `mildred init [path]` | Write a starter `mildred.yml` |
+| `mildred clean` | Run every job in `mildred.yml` |
+| `mildred clean -n` | Dry run. Shows what would move, moves nothing |
+| `mildred clean -c other.yml` | Use a different config file |
+| `mildred build` | Rebuild the container image (run after upgrading the gem) |
 
 ## Configuration
 
-`mildred.yml` defines your settings and jobs:
-
 ```yaml
 settings:
-  provider: ollama
-  model: granite4:latest
-
-  ollama:
-    port: 11434
+  model: qwen2.5:7b
 
 jobs:
   - name: Desktop Cleanup
     directory: ~/Desktop
     tasks:
       - Organize files into folders by type (Documents, Images, Archives)
-      - Delete screenshots older than 30 days
+      - Move screenshots into a Screenshots folder
+
+  - name: Sort Downloads
+    directories:
+      downloads: ~/Downloads
+      documents: ~/Documents
+      pictures: ~/Pictures
+    tasks:
+      - Move PDFs and Word docs from downloads to documents
+      - Move images from downloads to pictures
 ```
 
-Each job targets a directory and runs a list of natural-language tasks against it using the LLM.
+Each job mounts one or more folders and runs its tasks in order. Use `directory` for a single folder, or `directories` to name several so the agent can move files between them. Inside the container the agent sees them by name: `downloads/`, `documents/`, `pictures/`. A single `directory` is mounted under its own lowercased folder name, so `~/Desktop` shows up as `desktop/`.
 
-## Working with Ollama
+## Ollama
 
-Mildred uses Ollama as its LLM backend. The container connects to Ollama on your host machine through the Apple Container network gateway (`192.168.64.1`).
+The container reaches Ollama on your Mac through the container network gateway (`192.168.64.1`), so Ollama has to listen on all interfaces. In the Ollama macOS app, open Settings and turn on "Expose Ollama to the network". If you run it from the CLI:
 
-### Setup
-
-1. **Install Ollama** from [ollama.com](https://ollama.com)
-
-2. **Pull a model** (Mildred defaults to `qwen3` -- it needs good tool-calling support):
-
-   ```bash
-   ollama pull qwen3
-   ```
-
-3. **Start Ollama** — if Ollama is already running as a macOS app, it should work out of the box. If you're running it manually via the CLI, make sure it binds to all interfaces so the container can reach it:
-
-   ```bash
-   OLLAMA_HOST=0.0.0.0 ollama serve
-   ```
-
-   > By default `ollama serve` only listens on `127.0.0.1`, which isn't reachable from inside a container. The Ollama macOS app already listens on all interfaces.
-
-4. **Run Mildred**:
-
-   ```bash
-   mildred clean
-   ```
-
-   Mildred checks that Ollama is reachable before starting any jobs and will tell you if something is wrong.
-
-### Using a different model
-
-Set the model in `mildred.yml`:
-
-```yaml
-settings:
-  model: llama3.2:latest
+```bash
+OLLAMA_HOST=0.0.0.0 ollama serve
 ```
 
-### Custom Ollama host/port
+Mildred checks the connection before starting and tells you if it cannot get through.
 
-If Ollama is running on a non-default port or a different machine:
+Pick a model with solid tool calling. `qwen2.5:7b` is the default and works well at temperature 0. `qwen2.5:14b` is more careful and slower. If a model describes moves without making them, try another. Set a different host or port under `settings.ollama` if you need to:
 
 ```yaml
 settings:
@@ -106,15 +74,29 @@ settings:
     port: 11434
 ```
 
-## How It Works
+## How it works
 
-1. Mildred reads your `mildred.yml` config
-2. Builds a lightweight Linux container image (first run only, auto-rebuilds when source changes)
-3. For each job, spins up a sandboxed container with your target directory mounted at `/workspace`
-4. Sends each task to the LLM, which uses tool calls (list files, read files, move files, create directories) to organize your files
-5. The container is removed after each job completes
+The agent has three tools: `list_files`, `read_file`, and `move_file`. For each task the model lists the folders, decides what goes where, and moves things. Every tool call is printed as it happens, followed by the model's one-line summary. `move_file` creates missing folders and refuses to overwrite an existing file, so a name collision is reported rather than silently losing a file. The container is thrown away when the job ends.
 
-Your files are the only thing mounted into the container — the LLM agent can only see and touch what you point it at.
+The whole thing is two small Ruby files on the host side and two inside the container. Read them.
+
+## Development
+
+```bash
+git clone https://github.com/sammcclenaghan/mildred
+cd mildred
+bundle install
+rake test      # runs the suite, no container or model needed
+rake install   # builds the gem, installs it, rebuilds the image
+```
+
+The tools and the host CLI are unit tested with minitest. The agent loop is tested against a real Ollama conversation recorded with VCR into `test/cassettes`, so the model's tool calls replay offline while the file moves happen for real in a temp directory. To re-record it, delete the cassette and run `rake test` with Ollama running locally and a model set in `MILDRED_MODEL`.
+
+## Roadmap
+
+- Other providers (OpenAI, Anthropic) alongside Ollama
+- Undo, via a manifest of every move
+- Scheduled runs with launchd
 
 ## License
 
