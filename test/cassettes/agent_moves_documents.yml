@@ -6,21 +6,28 @@ http_interactions:
     body:
       encoding: UTF-8
       string: '{"model":"gemma4:e2b","messages":[{"role":"system","content":"You organize
-        files. You can see these folders:\n  - documents/\n  - downloads/\n\nRules:\n-
-        Call list_files on a folder before touching it. Only use file names it returned.
-        Never guess names.\n- Every path starts with one of the folders above, e.g.
-        move_file(\"documents/a.pdf\", \"downloads/a.pdf\").\n- When done, reply with
-        one or two sentences saying what you did, or why nothing could be done.\n"},{"role":"user","content":"Move
+        files. Today is 2026-09-18. You can see these folders:\n  - documents/\n  -
+        downloads/\n\nRules:\n- Call list_files on a folder before touching it. Only
+        use file names it returned. Never guess names.\n- Every path starts with one
+        of the folders above, e.g. move_file(\"documents/a.pdf\", \"downloads/a.pdf\").\n-
+        move_file moves single files. Only use move_folder when the task explicitly
+        asks to move a folder.\n- When done, reply with one or two sentences saying
+        what you did, or why nothing could be done.\n"},{"role":"user","content":"Move
         any documents or presentations from downloads to documents"}],"stream":false,"temperature":0,"tools":[{"type":"function","function":{"name":"list_files","description":"List
-        the files and folders inside a directory. Folders end with a slash.","parameters":{"type":"object","properties":{"path":{"type":"string","description":"Directory
+        the files and folders inside a directory. Folders end with a slash. Files
+        show their size and last-modified date. Hidden files are not shown.","parameters":{"type":"object","properties":{"path":{"type":"string","description":"Directory
         to list, e.g. downloads or downloads/photos"}},"required":["path"],"additionalProperties":false,"strict":true}}},{"type":"function","function":{"name":"read_file","description":"Read
         the first part of a text file. Only use this when the name alone is not enough
         to decide.","parameters":{"type":"object","properties":{"path":{"type":"string","description":"Path
         of the file to read, e.g. downloads/notes.txt"}},"required":["path"],"additionalProperties":false,"strict":true}}},{"type":"function","function":{"name":"move_file","description":"Move
-        or rename a file. Missing destination folders are created. Never overwrites
-        an existing file.","parameters":{"type":"object","properties":{"source":{"type":"string","description":"Path
+        or rename a single file. Missing destination folders are created. Never overwrites.
+        Cannot move folders; use move_folder for that.","parameters":{"type":"object","properties":{"source":{"type":"string","description":"Path
         of the file to move, e.g. downloads/report.pdf"},"destination":{"type":"string","description":"Where
-        to move it, e.g. documents/report.pdf or documents/"}},"required":["source","destination"],"additionalProperties":false,"strict":true}}}]}'
+        to move it, e.g. documents/report.pdf or documents/"}},"required":["source","destination"],"additionalProperties":false,"strict":true}}},{"type":"function","function":{"name":"move_folder","description":"Move
+        or rename a whole folder and everything in it. Only use this when the task
+        explicitly asks to move a folder. Never overwrites.","parameters":{"type":"object","properties":{"source":{"type":"string","description":"Path
+        of the folder to move, e.g. downloads/photos"},"destination":{"type":"string","description":"Where
+        to move it, e.g. pictures/photos or pictures/"}},"required":["source","destination"],"additionalProperties":false,"strict":true}}}]}'
     headers:
       User-Agent:
       - Faraday v2.14.4
@@ -40,75 +47,93 @@ http_interactions:
       Content-Type:
       - application/json
       Date:
-      - Fri, 18 Sep 2026 15:04:29 GMT
+      - Fri, 18 Sep 2026 15:26:54 GMT
       Content-Length:
-      - '1484'
+      - '1765'
     body:
       encoding: UTF-8
-      string: '{"id":"chatcmpl-316","object":"chat.completion","created":1789743869,"model":"gemma4:e2b","system_fingerprint":"fp_ollama","choices":[{"index":0,"message":{"role":"assistant","content":"","reasoning":"1.
+      string: '{"id":"chatcmpl-193","object":"chat.completion","created":1789745214,"model":"gemma4:e2b","system_fingerprint":"fp_ollama","choices":[{"index":0,"message":{"role":"assistant","content":"","reasoning":"1.
         **Analyze the Request:** The user wants to move \"any documents or presentations\"
-        from the `downloads/` folder to the `documents/` folder.\n\n2. **Identify
-        Necessary Steps:**\n    *   Step 1: List the contents of the `downloads/`
-        folder to see what files are available. (Rule: Call `list_files` before touching
-        files.)\n    *   Step 2: Examine the listed files to identify those that are
-        documents or presentations (e.g., .pdf, .doc, .ppt, .pptx).\n    *   Step
-        3: For each identified file, move it from `downloads/` to `documents/`. (Rule:
-        Use `move_file` with the correct source and destination paths.)\n\n3. **Execute
-        Step 1 (List files in downloads):** Call `list_files` for `downloads/`.\n\n4.
-        **Wait for Tool Output (Simulated):** The model needs the output of `list_files`
-        to proceed.\n\n5. **Determine Next Action (Self-Correction/Refinement):**
-        Since I don''t have the file list yet, I must call the tool first.\n\n6. **Formulate
-        the Tool Call:** `list_files(path=\"downloads/\")`","tool_calls":[{"id":"call_nfhv46we","index":0,"type":"function","function":{"name":"list_files","arguments":"{\"path\":\"downloads/\"}"}}]},"finish_reason":"tool_calls"}],"usage":{"prompt_tokens":390,"prompt_tokens_details":{"cached_tokens":0},"completion_tokens":286,"total_tokens":676}}
+        from the `downloads` folder to the `documents` folder.\n\n2. **Identify Necessary
+        Steps:**\n    *   I need to see the contents of the `downloads` folder to
+        identify the files to move.\n    *   I need to check if those files are documents
+        or presentations (based on their names or extensions, if possible, but the
+        prompt doesn''t specify a filtering rule, so I''ll assume any file found is
+        a candidate unless specified otherwise).\n    *   I need to move the identified
+        files.\n\n3. **Tool Selection:**\n    *   `list_files`: Needed to see what''s
+        in `downloads/`.\n    *   `move_file`: Needed to move the files once identified.\n\n4.
+        **Execution Plan:**\n    *   **Step 1:** Call `list_files` on `downloads`.\n    *   **Step
+        2:** Analyze the output of `list_files`.\n    *   **Step 3:** For each file
+        identified as a document or presentation, call `move_file` to move it from
+        `downloads/` to `documents/`.\n\n5. **Constraint Check:** The rules state:
+        \"Call list_files on a folder before touching it. Only use file names it returned.
+        Never guess names.\"\n\n6. **Initial Action:** Start by listing the files
+        in `downloads`.\n\n7. **Formulate the Tool Call:** `list_files(path=\"downloads\")`","tool_calls":[{"id":"call_b0awzenf","index":0,"type":"function","function":{"name":"list_files","arguments":"{\"path\":\"downloads\"}"}}]},"finish_reason":"tool_calls"}],"usage":{"prompt_tokens":569,"prompt_tokens_details":{"cached_tokens":0},"completion_tokens":341,"total_tokens":910}}
 
         '
-  recorded_at: Fri, 18 Sep 2026 15:04:29 GMT
+  recorded_at: Fri, 18 Sep 2026 15:26:54 GMT
 - request:
     method: post
     uri: http://127.0.0.1:11434/v1/chat/completions
     body:
       encoding: UTF-8
       string: '{"model":"gemma4:e2b","messages":[{"role":"system","content":"You organize
-        files. You can see these folders:\n  - documents/\n  - downloads/\n\nRules:\n-
-        Call list_files on a folder before touching it. Only use file names it returned.
-        Never guess names.\n- Every path starts with one of the folders above, e.g.
-        move_file(\"documents/a.pdf\", \"downloads/a.pdf\").\n- When done, reply with
-        one or two sentences saying what you did, or why nothing could be done.\n"},{"role":"user","content":"Move
-        any documents or presentations from downloads to documents"},{"role":"assistant","content":"","tool_calls":[{"id":"call_nfhv46we","type":"function","function":{"name":"list_files","arguments":"{\"path\":\"downloads/\"}"}}],"reasoning":"1.
+        files. Today is 2026-09-18. You can see these folders:\n  - documents/\n  -
+        downloads/\n\nRules:\n- Call list_files on a folder before touching it. Only
+        use file names it returned. Never guess names.\n- Every path starts with one
+        of the folders above, e.g. move_file(\"documents/a.pdf\", \"downloads/a.pdf\").\n-
+        move_file moves single files. Only use move_folder when the task explicitly
+        asks to move a folder.\n- When done, reply with one or two sentences saying
+        what you did, or why nothing could be done.\n"},{"role":"user","content":"Move
+        any documents or presentations from downloads to documents"},{"role":"assistant","content":"","tool_calls":[{"id":"call_b0awzenf","type":"function","function":{"name":"list_files","arguments":"{\"path\":\"downloads\"}"}}],"reasoning":"1.
         **Analyze the Request:** The user wants to move \"any documents or presentations\"
-        from the `downloads/` folder to the `documents/` folder.\n\n2. **Identify
-        Necessary Steps:**\n    *   Step 1: List the contents of the `downloads/`
-        folder to see what files are available. (Rule: Call `list_files` before touching
-        files.)\n    *   Step 2: Examine the listed files to identify those that are
-        documents or presentations (e.g., .pdf, .doc, .ppt, .pptx).\n    *   Step
-        3: For each identified file, move it from `downloads/` to `documents/`. (Rule:
-        Use `move_file` with the correct source and destination paths.)\n\n3. **Execute
-        Step 1 (List files in downloads):** Call `list_files` for `downloads/`.\n\n4.
-        **Wait for Tool Output (Simulated):** The model needs the output of `list_files`
-        to proceed.\n\n5. **Determine Next Action (Self-Correction/Refinement):**
-        Since I don''t have the file list yet, I must call the tool first.\n\n6. **Formulate
-        the Tool Call:** `list_files(path=\"downloads/\")`","reasoning_content":"1.
+        from the `downloads` folder to the `documents` folder.\n\n2. **Identify Necessary
+        Steps:**\n    *   I need to see the contents of the `downloads` folder to
+        identify the files to move.\n    *   I need to check if those files are documents
+        or presentations (based on their names or extensions, if possible, but the
+        prompt doesn''t specify a filtering rule, so I''ll assume any file found is
+        a candidate unless specified otherwise).\n    *   I need to move the identified
+        files.\n\n3. **Tool Selection:**\n    *   `list_files`: Needed to see what''s
+        in `downloads/`.\n    *   `move_file`: Needed to move the files once identified.\n\n4.
+        **Execution Plan:**\n    *   **Step 1:** Call `list_files` on `downloads`.\n    *   **Step
+        2:** Analyze the output of `list_files`.\n    *   **Step 3:** For each file
+        identified as a document or presentation, call `move_file` to move it from
+        `downloads/` to `documents/`.\n\n5. **Constraint Check:** The rules state:
+        \"Call list_files on a folder before touching it. Only use file names it returned.
+        Never guess names.\"\n\n6. **Initial Action:** Start by listing the files
+        in `downloads`.\n\n7. **Formulate the Tool Call:** `list_files(path=\"downloads\")`","reasoning_content":"1.
         **Analyze the Request:** The user wants to move \"any documents or presentations\"
-        from the `downloads/` folder to the `documents/` folder.\n\n2. **Identify
-        Necessary Steps:**\n    *   Step 1: List the contents of the `downloads/`
-        folder to see what files are available. (Rule: Call `list_files` before touching
-        files.)\n    *   Step 2: Examine the listed files to identify those that are
-        documents or presentations (e.g., .pdf, .doc, .ppt, .pptx).\n    *   Step
-        3: For each identified file, move it from `downloads/` to `documents/`. (Rule:
-        Use `move_file` with the correct source and destination paths.)\n\n3. **Execute
-        Step 1 (List files in downloads):** Call `list_files` for `downloads/`.\n\n4.
-        **Wait for Tool Output (Simulated):** The model needs the output of `list_files`
-        to proceed.\n\n5. **Determine Next Action (Self-Correction/Refinement):**
-        Since I don''t have the file list yet, I must call the tool first.\n\n6. **Formulate
-        the Tool Call:** `list_files(path=\"downloads/\")`"},{"role":"tool","content":"photo.jpg\nreport.pdf\nslides.pptx\nsong.mp3","tool_call_id":"call_nfhv46we"}],"stream":false,"temperature":0,"tools":[{"type":"function","function":{"name":"list_files","description":"List
-        the files and folders inside a directory. Folders end with a slash.","parameters":{"type":"object","properties":{"path":{"type":"string","description":"Directory
+        from the `downloads` folder to the `documents` folder.\n\n2. **Identify Necessary
+        Steps:**\n    *   I need to see the contents of the `downloads` folder to
+        identify the files to move.\n    *   I need to check if those files are documents
+        or presentations (based on their names or extensions, if possible, but the
+        prompt doesn''t specify a filtering rule, so I''ll assume any file found is
+        a candidate unless specified otherwise).\n    *   I need to move the identified
+        files.\n\n3. **Tool Selection:**\n    *   `list_files`: Needed to see what''s
+        in `downloads/`.\n    *   `move_file`: Needed to move the files once identified.\n\n4.
+        **Execution Plan:**\n    *   **Step 1:** Call `list_files` on `downloads`.\n    *   **Step
+        2:** Analyze the output of `list_files`.\n    *   **Step 3:** For each file
+        identified as a document or presentation, call `move_file` to move it from
+        `downloads/` to `documents/`.\n\n5. **Constraint Check:** The rules state:
+        \"Call list_files on a folder before touching it. Only use file names it returned.
+        Never guess names.\"\n\n6. **Initial Action:** Start by listing the files
+        in `downloads`.\n\n7. **Formulate the Tool Call:** `list_files(path=\"downloads\")`"},{"role":"tool","content":"photo.jpg  0
+        B  2026-09-18\nreport.pdf  0 B  2026-09-18\nslides.pptx  0 B  2026-09-18\nsong.mp3  0
+        B  2026-09-18","tool_call_id":"call_b0awzenf"}],"stream":false,"temperature":0,"tools":[{"type":"function","function":{"name":"list_files","description":"List
+        the files and folders inside a directory. Folders end with a slash. Files
+        show their size and last-modified date. Hidden files are not shown.","parameters":{"type":"object","properties":{"path":{"type":"string","description":"Directory
         to list, e.g. downloads or downloads/photos"}},"required":["path"],"additionalProperties":false,"strict":true}}},{"type":"function","function":{"name":"read_file","description":"Read
         the first part of a text file. Only use this when the name alone is not enough
         to decide.","parameters":{"type":"object","properties":{"path":{"type":"string","description":"Path
         of the file to read, e.g. downloads/notes.txt"}},"required":["path"],"additionalProperties":false,"strict":true}}},{"type":"function","function":{"name":"move_file","description":"Move
-        or rename a file. Missing destination folders are created. Never overwrites
-        an existing file.","parameters":{"type":"object","properties":{"source":{"type":"string","description":"Path
+        or rename a single file. Missing destination folders are created. Never overwrites.
+        Cannot move folders; use move_folder for that.","parameters":{"type":"object","properties":{"source":{"type":"string","description":"Path
         of the file to move, e.g. downloads/report.pdf"},"destination":{"type":"string","description":"Where
-        to move it, e.g. documents/report.pdf or documents/"}},"required":["source","destination"],"additionalProperties":false,"strict":true}}}]}'
+        to move it, e.g. documents/report.pdf or documents/"}},"required":["source","destination"],"additionalProperties":false,"strict":true}}},{"type":"function","function":{"name":"move_folder","description":"Move
+        or rename a whole folder and everything in it. Only use this when the task
+        explicitly asks to move a folder. Never overwrites.","parameters":{"type":"object","properties":{"source":{"type":"string","description":"Path
+        of the folder to move, e.g. downloads/photos"},"destination":{"type":"string","description":"Where
+        to move it, e.g. pictures/photos or pictures/"}},"required":["source","destination"],"additionalProperties":false,"strict":true}}}]}'
     headers:
       User-Agent:
       - Faraday v2.14.4
@@ -128,96 +153,109 @@ http_interactions:
       Content-Type:
       - application/json
       Date:
-      - Fri, 18 Sep 2026 15:04:48 GMT
+      - Fri, 18 Sep 2026 15:27:24 GMT
       Content-Length:
-      - '1544'
+      - '1541'
     body:
       encoding: UTF-8
-      string: '{"id":"chatcmpl-970","object":"chat.completion","created":1789743888,"model":"gemma4:e2b","system_fingerprint":"fp_ollama","choices":[{"index":0,"message":{"role":"assistant","content":"","reasoning":"1.
-        **Analyze Previous State:** The previous step was to list the files in `downloads/`.
-        The output was: `photo.jpg`, `report.pdf`, `slides.pptx`, `song.mp3`.\n\n2.
-        **Analyze the Goal:** The user wants to move \"any documents or presentations\"
-        from `downloads/` to `documents/`.\n\n3. **Identify Target Files:**\n    *   `report.pdf`:
-        This is a document.\n    *   `slides.pptx`: This is a presentation.\n    *   `photo.jpg`:
-        This is an image, not explicitly a document or presentation.\n    *   `song.mp3`:
-        This is audio, not a document or presentation.\n\n4. **Determine Actions:**
-        I need to move `report.pdf` and `slides.pptx` to the `documents/` folder.\n\n5.
-        **Formulate Tool Calls:**\n    *   Call `move_file` for `report.pdf`.\n    *   Call
-        `move_file` for `slides.pptx`.\n\n6. **Construct the Response:** Execute the
-        necessary moves.","tool_calls":[{"id":"call_u2xkhe7j","index":0,"type":"function","function":{"name":"move_file","arguments":"{\"destination\":\"documents/\",\"source\":\"downloads/report.pdf\"}"}},{"id":"call_sm5bd07n","index":1,"type":"function","function":{"name":"move_file","arguments":"{\"destination\":\"documents/\",\"source\":\"downloads/slides.pptx\"}"}}]},"finish_reason":"tool_calls"}],"usage":{"prompt_tokens":709,"prompt_tokens_details":{"cached_tokens":659},"completion_tokens":292,"total_tokens":1001}}
+      string: '{"id":"chatcmpl-601","object":"chat.completion","created":1789745244,"model":"gemma4:e2b","system_fingerprint":"fp_ollama","choices":[{"index":0,"message":{"role":"assistant","content":"","reasoning":"1.
+        **Analyze Previous Step:** I have listed the files in the `downloads` folder.
+        The files are: `photo.jpg`, `report.pdf`, `slides.pptx`, and `song.mp3`.\n\n2.
+        **Determine Target Files:** The request was to move \"documents or presentations\".\n    *   `report.pdf`
+        is a document.\n    *   `slides.pptx` is a presentation.\n    *   `photo.jpg`
+        is an image.\n    *   `song.mp3` is an audio file.\n\n3. **Plan Moves:** I
+        should move `report.pdf` and `slides.pptx` to the `documents` folder.\n\n4.
+        **Execute Moves (Step-by-Step):**\n    *   Move `report.pdf` from `downloads/report.pdf`
+        to `documents/report.pdf`.\n    *   Move `slides.pptx` from `downloads/slides.pptx`
+        to `documents/slides.pptx`.\n\n5. **Formulate Tool Calls:**\n    *   Call
+        `move_file` for `report.pdf`.\n    *   Call `move_file` for `slides.pptx`.","tool_calls":[{"id":"call_ujt8l5gp","index":0,"type":"function","function":{"name":"move_file","arguments":"{\"destination\":\"documents/report.pdf\",\"source\":\"downloads/report.pdf\"}"}},{"id":"call_1abt6txk","index":1,"type":"function","function":{"name":"move_file","arguments":"{\"destination\":\"documents/slides.pptx\",\"source\":\"downloads/slides.pptx\"}"}}]},"finish_reason":"tool_calls"}],"usage":{"prompt_tokens":999,"prompt_tokens_details":{"cached_tokens":894},"completion_tokens":320,"total_tokens":1319}}
 
         '
-  recorded_at: Fri, 18 Sep 2026 15:04:48 GMT
+  recorded_at: Fri, 18 Sep 2026 15:27:24 GMT
 - request:
     method: post
     uri: http://127.0.0.1:11434/v1/chat/completions
     body:
       encoding: UTF-8
       string: '{"model":"gemma4:e2b","messages":[{"role":"system","content":"You organize
-        files. You can see these folders:\n  - documents/\n  - downloads/\n\nRules:\n-
-        Call list_files on a folder before touching it. Only use file names it returned.
-        Never guess names.\n- Every path starts with one of the folders above, e.g.
-        move_file(\"documents/a.pdf\", \"downloads/a.pdf\").\n- When done, reply with
-        one or two sentences saying what you did, or why nothing could be done.\n"},{"role":"user","content":"Move
-        any documents or presentations from downloads to documents"},{"role":"assistant","content":"","tool_calls":[{"id":"call_nfhv46we","type":"function","function":{"name":"list_files","arguments":"{\"path\":\"downloads/\"}"}}],"reasoning":"1.
+        files. Today is 2026-09-18. You can see these folders:\n  - documents/\n  -
+        downloads/\n\nRules:\n- Call list_files on a folder before touching it. Only
+        use file names it returned. Never guess names.\n- Every path starts with one
+        of the folders above, e.g. move_file(\"documents/a.pdf\", \"downloads/a.pdf\").\n-
+        move_file moves single files. Only use move_folder when the task explicitly
+        asks to move a folder.\n- When done, reply with one or two sentences saying
+        what you did, or why nothing could be done.\n"},{"role":"user","content":"Move
+        any documents or presentations from downloads to documents"},{"role":"assistant","content":"","tool_calls":[{"id":"call_b0awzenf","type":"function","function":{"name":"list_files","arguments":"{\"path\":\"downloads\"}"}}],"reasoning":"1.
         **Analyze the Request:** The user wants to move \"any documents or presentations\"
-        from the `downloads/` folder to the `documents/` folder.\n\n2. **Identify
-        Necessary Steps:**\n    *   Step 1: List the contents of the `downloads/`
-        folder to see what files are available. (Rule: Call `list_files` before touching
-        files.)\n    *   Step 2: Examine the listed files to identify those that are
-        documents or presentations (e.g., .pdf, .doc, .ppt, .pptx).\n    *   Step
-        3: For each identified file, move it from `downloads/` to `documents/`. (Rule:
-        Use `move_file` with the correct source and destination paths.)\n\n3. **Execute
-        Step 1 (List files in downloads):** Call `list_files` for `downloads/`.\n\n4.
-        **Wait for Tool Output (Simulated):** The model needs the output of `list_files`
-        to proceed.\n\n5. **Determine Next Action (Self-Correction/Refinement):**
-        Since I don''t have the file list yet, I must call the tool first.\n\n6. **Formulate
-        the Tool Call:** `list_files(path=\"downloads/\")`","reasoning_content":"1.
+        from the `downloads` folder to the `documents` folder.\n\n2. **Identify Necessary
+        Steps:**\n    *   I need to see the contents of the `downloads` folder to
+        identify the files to move.\n    *   I need to check if those files are documents
+        or presentations (based on their names or extensions, if possible, but the
+        prompt doesn''t specify a filtering rule, so I''ll assume any file found is
+        a candidate unless specified otherwise).\n    *   I need to move the identified
+        files.\n\n3. **Tool Selection:**\n    *   `list_files`: Needed to see what''s
+        in `downloads/`.\n    *   `move_file`: Needed to move the files once identified.\n\n4.
+        **Execution Plan:**\n    *   **Step 1:** Call `list_files` on `downloads`.\n    *   **Step
+        2:** Analyze the output of `list_files`.\n    *   **Step 3:** For each file
+        identified as a document or presentation, call `move_file` to move it from
+        `downloads/` to `documents/`.\n\n5. **Constraint Check:** The rules state:
+        \"Call list_files on a folder before touching it. Only use file names it returned.
+        Never guess names.\"\n\n6. **Initial Action:** Start by listing the files
+        in `downloads`.\n\n7. **Formulate the Tool Call:** `list_files(path=\"downloads\")`","reasoning_content":"1.
         **Analyze the Request:** The user wants to move \"any documents or presentations\"
-        from the `downloads/` folder to the `documents/` folder.\n\n2. **Identify
-        Necessary Steps:**\n    *   Step 1: List the contents of the `downloads/`
-        folder to see what files are available. (Rule: Call `list_files` before touching
-        files.)\n    *   Step 2: Examine the listed files to identify those that are
-        documents or presentations (e.g., .pdf, .doc, .ppt, .pptx).\n    *   Step
-        3: For each identified file, move it from `downloads/` to `documents/`. (Rule:
-        Use `move_file` with the correct source and destination paths.)\n\n3. **Execute
-        Step 1 (List files in downloads):** Call `list_files` for `downloads/`.\n\n4.
-        **Wait for Tool Output (Simulated):** The model needs the output of `list_files`
-        to proceed.\n\n5. **Determine Next Action (Self-Correction/Refinement):**
-        Since I don''t have the file list yet, I must call the tool first.\n\n6. **Formulate
-        the Tool Call:** `list_files(path=\"downloads/\")`"},{"role":"tool","content":"photo.jpg\nreport.pdf\nslides.pptx\nsong.mp3","tool_call_id":"call_nfhv46we"},{"role":"assistant","content":"","tool_calls":[{"id":"call_u2xkhe7j","type":"function","function":{"name":"move_file","arguments":"{\"destination\":\"documents/\",\"source\":\"downloads/report.pdf\"}"}},{"id":"call_sm5bd07n","type":"function","function":{"name":"move_file","arguments":"{\"destination\":\"documents/\",\"source\":\"downloads/slides.pptx\"}"}}],"reasoning":"1.
-        **Analyze Previous State:** The previous step was to list the files in `downloads/`.
-        The output was: `photo.jpg`, `report.pdf`, `slides.pptx`, `song.mp3`.\n\n2.
-        **Analyze the Goal:** The user wants to move \"any documents or presentations\"
-        from `downloads/` to `documents/`.\n\n3. **Identify Target Files:**\n    *   `report.pdf`:
-        This is a document.\n    *   `slides.pptx`: This is a presentation.\n    *   `photo.jpg`:
-        This is an image, not explicitly a document or presentation.\n    *   `song.mp3`:
-        This is audio, not a document or presentation.\n\n4. **Determine Actions:**
-        I need to move `report.pdf` and `slides.pptx` to the `documents/` folder.\n\n5.
-        **Formulate Tool Calls:**\n    *   Call `move_file` for `report.pdf`.\n    *   Call
-        `move_file` for `slides.pptx`.\n\n6. **Construct the Response:** Execute the
-        necessary moves.","reasoning_content":"1. **Analyze Previous State:** The
-        previous step was to list the files in `downloads/`. The output was: `photo.jpg`,
-        `report.pdf`, `slides.pptx`, `song.mp3`.\n\n2. **Analyze the Goal:** The user
-        wants to move \"any documents or presentations\" from `downloads/` to `documents/`.\n\n3.
-        **Identify Target Files:**\n    *   `report.pdf`: This is a document.\n    *   `slides.pptx`:
-        This is a presentation.\n    *   `photo.jpg`: This is an image, not explicitly
-        a document or presentation.\n    *   `song.mp3`: This is audio, not a document
-        or presentation.\n\n4. **Determine Actions:** I need to move `report.pdf`
-        and `slides.pptx` to the `documents/` folder.\n\n5. **Formulate Tool Calls:**\n    *   Call
-        `move_file` for `report.pdf`.\n    *   Call `move_file` for `slides.pptx`.\n\n6.
-        **Construct the Response:** Execute the necessary moves."},{"role":"tool","content":"Moved
-        downloads/report.pdf to documents/report.pdf","tool_call_id":"call_u2xkhe7j"},{"role":"tool","content":"Moved
-        downloads/slides.pptx to documents/slides.pptx","tool_call_id":"call_sm5bd07n"}],"stream":false,"temperature":0,"tools":[{"type":"function","function":{"name":"list_files","description":"List
-        the files and folders inside a directory. Folders end with a slash.","parameters":{"type":"object","properties":{"path":{"type":"string","description":"Directory
+        from the `downloads` folder to the `documents` folder.\n\n2. **Identify Necessary
+        Steps:**\n    *   I need to see the contents of the `downloads` folder to
+        identify the files to move.\n    *   I need to check if those files are documents
+        or presentations (based on their names or extensions, if possible, but the
+        prompt doesn''t specify a filtering rule, so I''ll assume any file found is
+        a candidate unless specified otherwise).\n    *   I need to move the identified
+        files.\n\n3. **Tool Selection:**\n    *   `list_files`: Needed to see what''s
+        in `downloads/`.\n    *   `move_file`: Needed to move the files once identified.\n\n4.
+        **Execution Plan:**\n    *   **Step 1:** Call `list_files` on `downloads`.\n    *   **Step
+        2:** Analyze the output of `list_files`.\n    *   **Step 3:** For each file
+        identified as a document or presentation, call `move_file` to move it from
+        `downloads/` to `documents/`.\n\n5. **Constraint Check:** The rules state:
+        \"Call list_files on a folder before touching it. Only use file names it returned.
+        Never guess names.\"\n\n6. **Initial Action:** Start by listing the files
+        in `downloads`.\n\n7. **Formulate the Tool Call:** `list_files(path=\"downloads\")`"},{"role":"tool","content":"photo.jpg  0
+        B  2026-09-18\nreport.pdf  0 B  2026-09-18\nslides.pptx  0 B  2026-09-18\nsong.mp3  0
+        B  2026-09-18","tool_call_id":"call_b0awzenf"},{"role":"assistant","content":"","tool_calls":[{"id":"call_ujt8l5gp","type":"function","function":{"name":"move_file","arguments":"{\"destination\":\"documents/report.pdf\",\"source\":\"downloads/report.pdf\"}"}},{"id":"call_1abt6txk","type":"function","function":{"name":"move_file","arguments":"{\"destination\":\"documents/slides.pptx\",\"source\":\"downloads/slides.pptx\"}"}}],"reasoning":"1.
+        **Analyze Previous Step:** I have listed the files in the `downloads` folder.
+        The files are: `photo.jpg`, `report.pdf`, `slides.pptx`, and `song.mp3`.\n\n2.
+        **Determine Target Files:** The request was to move \"documents or presentations\".\n    *   `report.pdf`
+        is a document.\n    *   `slides.pptx` is a presentation.\n    *   `photo.jpg`
+        is an image.\n    *   `song.mp3` is an audio file.\n\n3. **Plan Moves:** I
+        should move `report.pdf` and `slides.pptx` to the `documents` folder.\n\n4.
+        **Execute Moves (Step-by-Step):**\n    *   Move `report.pdf` from `downloads/report.pdf`
+        to `documents/report.pdf`.\n    *   Move `slides.pptx` from `downloads/slides.pptx`
+        to `documents/slides.pptx`.\n\n5. **Formulate Tool Calls:**\n    *   Call
+        `move_file` for `report.pdf`.\n    *   Call `move_file` for `slides.pptx`.","reasoning_content":"1.
+        **Analyze Previous Step:** I have listed the files in the `downloads` folder.
+        The files are: `photo.jpg`, `report.pdf`, `slides.pptx`, and `song.mp3`.\n\n2.
+        **Determine Target Files:** The request was to move \"documents or presentations\".\n    *   `report.pdf`
+        is a document.\n    *   `slides.pptx` is a presentation.\n    *   `photo.jpg`
+        is an image.\n    *   `song.mp3` is an audio file.\n\n3. **Plan Moves:** I
+        should move `report.pdf` and `slides.pptx` to the `documents` folder.\n\n4.
+        **Execute Moves (Step-by-Step):**\n    *   Move `report.pdf` from `downloads/report.pdf`
+        to `documents/report.pdf`.\n    *   Move `slides.pptx` from `downloads/slides.pptx`
+        to `documents/slides.pptx`.\n\n5. **Formulate Tool Calls:**\n    *   Call
+        `move_file` for `report.pdf`.\n    *   Call `move_file` for `slides.pptx`."},{"role":"tool","content":"Moved
+        downloads/report.pdf to documents/report.pdf","tool_call_id":"call_ujt8l5gp"},{"role":"tool","content":"Moved
+        downloads/slides.pptx to documents/slides.pptx","tool_call_id":"call_1abt6txk"}],"stream":false,"temperature":0,"tools":[{"type":"function","function":{"name":"list_files","description":"List
+        the files and folders inside a directory. Folders end with a slash. Files
+        show their size and last-modified date. Hidden files are not shown.","parameters":{"type":"object","properties":{"path":{"type":"string","description":"Directory
         to list, e.g. downloads or downloads/photos"}},"required":["path"],"additionalProperties":false,"strict":true}}},{"type":"function","function":{"name":"read_file","description":"Read
         the first part of a text file. Only use this when the name alone is not enough
         to decide.","parameters":{"type":"object","properties":{"path":{"type":"string","description":"Path
         of the file to read, e.g. downloads/notes.txt"}},"required":["path"],"additionalProperties":false,"strict":true}}},{"type":"function","function":{"name":"move_file","description":"Move
-        or rename a file. Missing destination folders are created. Never overwrites
-        an existing file.","parameters":{"type":"object","properties":{"source":{"type":"string","description":"Path
+        or rename a single file. Missing destination folders are created. Never overwrites.
+        Cannot move folders; use move_folder for that.","parameters":{"type":"object","properties":{"source":{"type":"string","description":"Path
         of the file to move, e.g. downloads/report.pdf"},"destination":{"type":"string","description":"Where
-        to move it, e.g. documents/report.pdf or documents/"}},"required":["source","destination"],"additionalProperties":false,"strict":true}}}]}'
+        to move it, e.g. documents/report.pdf or documents/"}},"required":["source","destination"],"additionalProperties":false,"strict":true}}},{"type":"function","function":{"name":"move_folder","description":"Move
+        or rename a whole folder and everything in it. Only use this when the task
+        explicitly asks to move a folder. Never overwrites.","parameters":{"type":"object","properties":{"source":{"type":"string","description":"Path
+        of the folder to move, e.g. downloads/photos"},"destination":{"type":"string","description":"Where
+        to move it, e.g. pictures/photos or pictures/"}},"required":["source","destination"],"additionalProperties":false,"strict":true}}}]}'
     headers:
       User-Agent:
       - Faraday v2.14.4
@@ -237,20 +275,20 @@ http_interactions:
       Content-Type:
       - application/json
       Date:
-      - Fri, 18 Sep 2026 15:04:57 GMT
+      - Fri, 18 Sep 2026 15:27:32 GMT
       Content-Length:
-      - '872'
+      - '834'
     body:
       encoding: UTF-8
-      string: '{"id":"chatcmpl-530","object":"chat.completion","created":1789743897,"model":"gemma4:e2b","system_fingerprint":"fp_ollama","choices":[{"index":0,"message":{"role":"assistant","content":"I
-        have moved the document and presentation files (`report.pdf` and `slides.pptx`)
-        from the downloads folder to the documents folder.","reasoning":"1. **Analyze
-        Previous State:** The previous steps successfully moved `report.pdf` and `slides.pptx`
-        from `downloads/` to `documents/`.\n\n2. **Review Request:** The original
-        request was to \"Move any documents or presentations from downloads to documents\".\n\n3.
-        **Final Check:** All identified relevant files have been moved.\n\n4. **Formulate
-        Final Response:** Confirm the action taken."},"finish_reason":"stop"}],"usage":{"prompt_tokens":1056,"prompt_tokens_details":{"cached_tokens":948},"completion_tokens":117,"total_tokens":1173}}
+      string: '{"id":"chatcmpl-129","object":"chat.completion","created":1789745252,"model":"gemma4:e2b","system_fingerprint":"fp_ollama","choices":[{"index":0,"message":{"role":"assistant","content":"I
+        have moved the document `report.pdf` and the presentation `slides.pptx` from
+        the downloads folder to the documents folder.","reasoning":"1. **Review Previous
+        Actions:** I have successfully executed the moves for `report.pdf` and `slides.pptx`.\n\n2.
+        **Final Response Formulation:** The task was to move documents or presentations
+        from downloads to documents. I have completed this action. I should now inform
+        the user of the completion.\n\n3. **Conclusion:** The requested operation
+        is complete."},"finish_reason":"stop"}],"usage":{"prompt_tokens":1373,"prompt_tokens_details":{"cached_tokens":1318},"completion_tokens":105,"total_tokens":1478}}
 
         '
-  recorded_at: Fri, 18 Sep 2026 15:04:57 GMT
+  recorded_at: Fri, 18 Sep 2026 15:27:32 GMT
 recorded_with: VCR 6.4.0

@@ -2,7 +2,7 @@ require "ruby_llm"
 require_relative "tools"
 
 class Agent
-  TOOLS = [ListFiles, ReadFile, MoveFile].freeze
+  TOOLS = [ListFiles, ReadFile, MoveFile, MoveFolder].freeze
 
   def initialize(workspace:, model:, out: $stdout)
     @workspace = workspace
@@ -36,12 +36,13 @@ class Agent
 
   def prompt(dirs)
     <<~PROMPT
-      You organize files. You can see these folders:
+      You organize files. Today is #{Time.now.strftime("%Y-%m-%d")}. You can see these folders:
       #{dirs.map { |d| "  - #{d}/" }.join("\n")}
 
       Rules:
       - Call list_files on a folder before touching it. Only use file names it returned. Never guess names.
       - Every path starts with one of the folders above, e.g. move_file("#{dirs.first}/a.pdf", "#{dirs.last}/a.pdf").
+      - move_file moves single files. Only use move_folder when the task explicitly asks to move a folder.
       - When done, reply with one or two sentences saying what you did, or why nothing could be done.
     PROMPT
   end

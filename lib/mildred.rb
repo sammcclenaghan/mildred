@@ -11,7 +11,10 @@ module Mildred
     usage: mildred <command>
 
       init [path]        write a starter mildred.yml
-      clean [-n] [-c]    run the jobs in mildred.yml (-n previews without moving anything)
+      clean              run the jobs in mildred.yml
+        -n, --dry-run      preview without moving anything
+        -c, --config PATH  use a different config file
+        -j, --job NAME     run only the job with this name
       build              build the container image
   TEXT
 
@@ -60,10 +63,11 @@ module Mildred
   end
 
   def self.clean(argv)
-    opts = { config: "mildred.yml", dry_run: false }
+    opts = { config: "mildred.yml", dry_run: false, job: nil }
     OptionParser.new do |o|
       o.on("-n", "--dry-run") { opts[:dry_run] = true }
       o.on("-c", "--config PATH") { |path| opts[:config] = path }
+      o.on("-j", "--job NAME") { |name| opts[:job] = name }
     end.parse!(argv)
 
     raise Error, "#{opts[:config]} not found. Run: mildred init" unless File.exist?(opts[:config])
@@ -72,6 +76,11 @@ module Mildred
     settings = config.fetch("settings", {})
     jobs     = config.fetch("jobs", [])
     raise Error, "no jobs defined in #{opts[:config]}" if jobs.empty?
+
+    if opts[:job]
+      jobs = jobs.select { |job| job["name"].to_s.casecmp?(opts[:job]) }
+      raise Error, "no job named '#{opts[:job]}' in #{opts[:config]}" if jobs.empty?
+    end
 
     ollama = settings.fetch("ollama", {})
     host   = ollama.fetch("host", "192.168.64.1")

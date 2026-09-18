@@ -30,6 +30,7 @@ The first `clean` builds the container image, which takes a minute.
 | `mildred clean` | Run every job in `mildred.yml` |
 | `mildred clean -n` | Dry run. Shows what would move, moves nothing |
 | `mildred clean -c other.yml` | Use a different config file |
+| `mildred clean -j "Sort Downloads"` | Run a single job by name |
 | `mildred build` | Rebuild the container image (run after upgrading the gem) |
 
 ## Configuration
@@ -76,9 +77,28 @@ settings:
     port: 11434
 ```
 
+## Running on a schedule
+
+Like [maid](https://github.com/maid/maid), Mildred is happy to run from cron. Add a line with `crontab -e`:
+
+```cron
+PATH=/usr/local/bin:/usr/bin:/bin
+*/30 * * * * /path/to/mildred clean -c /Users/you/mildred.yml >> /Users/you/Library/Logs/mildred.log 2>&1
+```
+
+Three things trip people up:
+
+- **Absolute paths.** Cron runs with a bare environment. Use the full path to `mildred` (see `which mildred`) and to the config. `/usr/local/bin` has to be on PATH for the `container` CLI.
+- **Full Disk Access.** macOS blocks cron from Desktop, Documents, and Downloads until you add `/usr/sbin/cron` under System Settings → Privacy & Security → Full Disk Access. Press Cmd+Shift+G in the file picker to type the path.
+- **The container service.** `container system start` has to have been run since the last boot. Add it as a login item, or put `/usr/local/bin/container system start;` in front of the mildred command.
+
+Use `-j` to schedule jobs at different rates, for example Downloads every half hour and Desktop nightly.
+
 ## How it works
 
-The agent has three tools: `list_files`, `read_file`, and `move_file`. For each task the model lists the folders, decides what goes where, and moves things. Every tool call is printed as it happens, followed by the model's one-line summary. `move_file` creates missing folders and refuses to overwrite an existing file, so a name collision is reported rather than silently losing a file. The container is thrown away when the job ends.
+The agent has four tools: `list_files`, `read_file`, `move_file`, and `move_folder`. `list_files` shows each file's size and modified date and hides dotfiles, and the prompt includes today's date, so tasks like "archive anything older than a month" work. For each task the model lists the folders, decides what goes where, and moves things. Every tool call is printed as it happens, followed by the model's one-line summary.
+
+`move_file` only moves single files, creates missing folders, and refuses to overwrite an existing file, so a name collision is reported rather than silently losing a file. Folders need `move_folder`, which the model is told to use only when a task explicitly asks for it. That way a broad rule like "move everything older than 30 days" cannot sweep a folder along by accident. The container is thrown away when the job ends.
 
 The whole thing is two small Ruby files on the host side and two inside the container. Read them.
 

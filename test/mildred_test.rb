@@ -134,4 +134,43 @@ class CleanTest < Minitest::Test
       assert_equal [["One", expected], ["Two", expected]], ran
     end
   end
+
+  def test_job_flag_runs_only_that_job
+    with_two_jobs do |path|
+      ran = run_clean(["-c", path, "--job", "two"])
+      assert_equal ["Two"], ran
+    end
+  end
+
+  def test_job_flag_with_unknown_name_raises
+    with_two_jobs do |path|
+      err = assert_raises(Mildred::Error) { run_clean(["-c", path, "-j", "Nope"]) }
+      assert_match(/no job named 'Nope'/, err.message)
+    end
+  end
+
+  private
+
+  def with_two_jobs
+    Dir.mktmpdir do |dir|
+      path = File.join(dir, "mildred.yml")
+      File.write(path, <<~YAML)
+        jobs:
+          - { name: One, directory: #{dir}, tasks: [a] }
+          - { name: Two, directory: #{dir}, tasks: [b] }
+      YAML
+      stub_request(:get, "http://192.168.64.1:11434/").to_return(body: "ok")
+      yield path
+    end
+  end
+
+  def run_clean(argv)
+    ran = []
+    Mildred.stub(:image_exists?, true) do
+      Mildred.stub(:run_job, ->(job, **) { ran << job["name"] }) do
+        capture_io { Mildred.clean(argv) }
+      end
+    end
+    ran
+  end
 end
